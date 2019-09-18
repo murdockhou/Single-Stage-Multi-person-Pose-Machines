@@ -17,11 +17,8 @@ import cv2
 import os
 import math
 from config.center_config import center_config as center_params
-from encoder.center import centerEncoder
-from encoder.keypoints import kpsEncoder
 from utils.utils import clip, gaussian_radius, prepare_bbox, read_json, prepare_kps
 from utils.data_aug import data_aug
-from decoder.center import centerDecoder
 from encoder.spm import SingleStageLabel
 
 id_bboxs_dict = None
