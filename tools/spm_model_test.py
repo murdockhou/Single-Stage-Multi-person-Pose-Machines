@@ -16,7 +16,7 @@ from nets.spm_model import SpmModel
 from decoder.decode_spm import SpmDecoder
 
 img_path = '/media/hsw/E/datasets/ai_challenger_valid_test/ai_challenger_keypoint_test_b_20180103/keypoint_test_b_images_20180103'
-ckpt_path = '/media/hsw/E/ckpt/spm_net/2019-09-17-18-45/ckpt-8'
+ckpt_path = '/media/hsw/E/ckpt/spm_net/ckpt-40'
 colors = [[0,0,255],[255,0,0],[0,255,0],[0,255,255],[255,0,255],[255,255,0]]
 netH = 512
 netW = 512
@@ -25,7 +25,7 @@ dist = 10
 
 if __name__ == '__main__':
 
-    use_gpu = False
+    use_gpu = True
     use_nms = True
 
     if use_gpu:
@@ -58,6 +58,9 @@ if __name__ == '__main__':
         factor_x = img_ori.shape[1] / (netW / 4)
         factor_y = img_ori.shape[0] / (netH / 4)
 
+        # factor_x = 4
+        # factor_y = 4
+        # img_ori = img
 
         center_map, kps_reg_map = model(img_input)
         # label = outputs[0]

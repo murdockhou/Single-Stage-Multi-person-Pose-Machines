@@ -20,6 +20,22 @@ In this repo, just use [hrnet](https://github.com/VXallset/deep-high-resolution-
 
 All config can be found in `config/center_config.py`
 
+## Test on images
+
+`python3 tools/spm_model_test.py`
+
+## Eval
+
+create predicts json file
+
+`python3 tools/model_val.py`
+
+eval
+
+`python3 tools/ai_format_kps_eval.py --ref true_label.json --submit predict.json`
+
+detailed information can be found [here](https://github.com/AIChallenger/AI_Challenger_2017/tree/master/Evaluation/keypoint_eval) 
+
 ## ai_formate joints:
 
  1. right_shoulder 

@@ -23,6 +23,8 @@ class SpmDecoder():
                       [13, 12]]
         # self.Z = math.sqrt(outw*outw + outh*outh)
         self.Z = 1
+        self.outw = outw
+        self.outh = outh
         # print ('decoder self.z', self.Z)
 
     def __call__(self, spm_label, score_thres=0.9, dis_thres=5):
@@ -45,6 +47,8 @@ class SpmDecoder():
                     # print (i, index)
                     if i == 0:
                         start_joint = [root_joint[1], root_joint[0]]
+                    if start_joint[0] >= kps_map.shape[1] or start_joint[1] >= kps_map.shape[0]:
+                        break
                     offset = kps_map[start_joint[1], start_joint[0], 2*index:2*index+2] * self.Z
                     # print (offset)
                     joint = [start_joint[0]+offset[0], start_joint[1]+offset[1]]

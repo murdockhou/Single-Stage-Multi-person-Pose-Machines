@@ -4,7 +4,7 @@
 @author: matthew hsw
 @contact: murdockhou@gmail.com
 @software: pycharm
-@file: encoder_test.py
+@file: dataset_test.py
 @time: 2019/7/23 下午3:34
 @desc:
 '''
@@ -13,7 +13,7 @@ import cv2
 import numpy as np
 import os
 
-use_dataset = False
+use_dataset = True
 
 if use_dataset:
     import tensorflow as tf
@@ -22,37 +22,51 @@ if use_dataset:
     from config.center_config import center_config
     os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
-    dataset = get_dataset()
+    mode = 'val'
+    dataset = get_dataset(mode)
+
     colors = [[0,0,255],[255,0,0],[0,255,0]]
-
-    for epco in range(1):
-        for step, (img, label) in enumerate(dataset):
-            # print (step)
-            # print (img[0].shape)
-            # img1 = img[0]
-            # label1 = label[0]
-            # break
-            print ('epoch {} / step {}'.format(epco, step))
-            img = (img.numpy()[0] * 255).astype(np.uint8)
-
-            label = label[0]
-
-            spm_decoder = SpmDecoder(4, 4, center_config['height']//4, center_config['width']//4)
-            joints, centers = spm_decoder(label)
-
-            for j,  single_person_joints in enumerate(joints):
-                cv2.circle(img, (int(centers[j][0]), int(centers[j][1])), 8, colors[j%3], thickness=-1)
-                for i in range(14):
-                    x = int(single_person_joints[2*i])
-                    y = int(single_person_joints[2*i+1])
-                    cv2.circle(img, (x,y),4,colors[j%3],thickness=-1)
-                    cv2.putText(img, str(i), (x,y), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 250), 1)
-            cv2.imshow('label', img)
-            k = cv2.waitKey(0)
-            if k == 113:
+    if mode == 'val':
+        for epco in range(1):
+            for step, (imgids, heights, widths, imgs) in enumerate(dataset):
+                print('epoch {} / step {}'.format(epco, step))
+                print (imgids)
+                print (heights)
+                print (heights[0].numpy())
+                print (widths)
+                print (imgs.shape)
+                imgids = imgids.numpy()
+                print(str(imgids[0], encoding='utf-8'))
                 break
+    else:
+        for epco in range(1):
+            for step, (img, label) in enumerate(dataset):
+                # print (step)
+                # print (img[0].shape)
+                # img1 = img[0]
+                # label1 = label[0]
+                # break
+                print ('epoch {} / step {}'.format(epco, step))
+                img = (img.numpy()[0] * 255).astype(np.uint8)
 
-# test on label without dataset
+                label = label[0]
+
+                spm_decoder = SpmDecoder(4, 4, center_config['height']//4, center_config['width']//4)
+                joints, centers = spm_decoder(label)
+
+                for j,  single_person_joints in enumerate(joints):
+                    cv2.circle(img, (int(centers[j][0]), int(centers[j][1])), 8, colors[j%3], thickness=-1)
+                    for i in range(14):
+                        x = int(single_person_joints[2*i])
+                        y = int(single_person_joints[2*i+1])
+                        cv2.circle(img, (x,y),4,colors[j%3],thickness=-1)
+                        cv2.putText(img, str(i), (x,y), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 250), 1)
+                cv2.imshow('label', img)
+                k = cv2.waitKey(0)
+                if k == 113:
+                    break
+
+# tools on label without dataset
 else:
     from utils.utils import *
     from config.center_config import center_config as params
