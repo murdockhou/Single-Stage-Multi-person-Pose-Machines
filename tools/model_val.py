@@ -3,9 +3,10 @@ import os
 import cv2
 import numpy as np
 import json
+import time
+
 from nets.spm_model import SpmModel
 from dataset.dataset import get_dataset
-from loss.losses import spm_loss
 from config.center_config import center_config as params
 from decoder.decode_spm import SpmDecoder
 
@@ -14,9 +15,17 @@ netH = params['height']
 netW = params['width']
 score = 0.6
 dist = 20
-ckpt_path = '/media/hsw/E/ckpt/spm_net/ckpt-20'
+ckpt_path = '/home/hsw/server/ckpt-74/ckpt-82'
 
-params['val_json_file'] = 'jsons/val_500.json'
+# params['val_json_file'] = 'jsons/val_500.json'
+
+@tf.function
+def infer(model, inputs):
+
+    center_map, kps_reg_map = model(inputs)
+
+    return center_map, kps_reg_map
+
 
 if __name__ == '__main__':
 
@@ -34,13 +43,16 @@ if __name__ == '__main__':
     outputs = SpmModel(inputs, 14, is_training=False)
     model = tf.keras.Model(inputs, outputs)
     ckpt = tf.train.Checkpoint(net=model)
+
     ckpt.restore(ckpt_path)
 
     val_dataset = get_dataset(mode='val')
     predictions = []
 
     for step, (imgids, heights, widths, imgs) in enumerate(val_dataset):
-        center_map, kps_reg_map = model(imgs)
+        s = time.time()
+        imgs = tf.reshape(imgs, shape=(-1, netH, netW, 3))
+        center_map, kps_reg_map = infer(model, imgs)
         imgids = imgids.numpy()
         for b in range(params['batch_size']):
             factor_x = widths[b].numpy() / (netW / 4)
@@ -66,10 +78,13 @@ if __name__ == '__main__':
                 human += 1
             predict['keypoint_annotations'] = kps
             predictions.append(predict)
-        print ("processing.... {} / {}".format(step, 500//params['batch_size']))
-    print (len(predictions))
-    with open('jsons/' + ckpt_path.split('/')[-1]+'_predicts.json', 'w') as fw:
+        e = time.time()
+        print("processing.... {} / {}, time cost == {}".format(step, 30000 // params['batch_size'], e-s))
+
+    print(len(predictions))
+    with open('jsons/' + ckpt_path.split('/')[-1] + '_predicts.json', 'w') as fw:
         json.dump(predictions, fw)
+        print('done')
 
 
             #### test
@@ -90,5 +105,3 @@ if __name__ == '__main__':
             # if k == 113:
             #     break
             ####
-
-

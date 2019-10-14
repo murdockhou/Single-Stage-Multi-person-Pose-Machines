@@ -22,7 +22,7 @@ if use_dataset:
     from config.center_config import center_config
     os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
-    mode = 'val'
+    mode = 'train'
     dataset = get_dataset(mode)
 
     colors = [[0,0,255],[255,0,0],[0,255,0]]
@@ -52,7 +52,7 @@ if use_dataset:
                 label = label[0]
 
                 spm_decoder = SpmDecoder(4, 4, center_config['height']//4, center_config['width']//4)
-                joints, centers = spm_decoder(label)
+                joints, centers = spm_decoder([label[...,0:1], label[...,1:2*14+1]])
 
                 for j,  single_person_joints in enumerate(joints):
                     cv2.circle(img, (int(centers[j][0]), int(centers[j][1])), 8, colors[j%3], thickness=-1)
@@ -72,6 +72,8 @@ else:
     from config.center_config import center_config as params
     from encoder.spm import SingleStageLabel
     from decoder.decode_spm import SpmDecoder
+    from utils.data_aug import data_aug
+
     json_file = '/media/hsw/E/datasets/ai_challenger_keypoint_train_20170909/train10.json'
     img_path = '/media/hsw/E/datasets/ai_challenger_keypoint_train_20170909/keypoint_train_images_20170902'
     img_ids, id_annos_dict, id_kps_dict = read_json(json_file)
@@ -82,19 +84,24 @@ else:
         kps = id_kps_dict[img_id]
         img = cv2.imread(os.path.join(img_path, img_id + '.jpg'))
 
-        img_ori = img.copy()
-        for box in bboxs:
-            print(box)
-            cv2.rectangle(img_ori, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(0, 0, 255))
+        ################# show ori label ##########################
+        # img_ori = img.copy()
+        # for box in bboxs:
+        #     print(box)
+        #     cv2.rectangle(img_ori, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), color=(0, 0, 255))
+        #
+        # for j, kp in enumerate(kps):
+        #     print (j, kp)
+        #     for i in range(14):
+        #         x = int(kp[i*3])
+        #         y = int(kp[i*3+1])
+        #         v = kp[i*3+2]
+        #         cv2.circle(img_ori, (x,y),4,colors[j%3],thickness=-1)
+        # cv2.imshow('ori', img_ori)
+        ###########################################################
 
-        for j, kp in enumerate(kps):
-            for i in range(14):
-                x = int(kp[i*3])
-                y = int(kp[i*3+1])
-                v = kp[i*3+2]
-                cv2.circle(img_ori, (x,y),4,colors[j%3],thickness=-1)
         #  data aug
-        # img, bboxs, kps = data_aug(img, bboxs, None)
+        img, bboxs, kps = data_aug(img, bboxs, kps)
 
         # padding img
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -134,13 +141,13 @@ else:
         #     cv2.circle(img, (x, y), 8, (0,0,255), thickness=-1)
 
         for single_person_joints in joints:
-            # print(kps)
             for i in range(14):
                 x = int(single_person_joints[2*i])
                 y = int(single_person_joints[2*i+1])
                 cv2.circle(img, (x,y), 4, (0,255,0),thickness=-1)
+                cv2.putText(img, str(i), (x,y), cv2.FONT_HERSHEY_COMPLEX, 1,
+                            (0, 0, 250), 1)
         cv2.imshow('label', img)
-        cv2.imshow('ori', img_ori)
         k = cv2.waitKey(0)
         if k == 113:
             break

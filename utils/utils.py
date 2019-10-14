@@ -309,6 +309,9 @@ def prepare_kps(kps, orih, oriw, outh, outw):
         kp = np.reshape(np.asarray(kp, dtype=np.float), (-1,3))
         kp[:,0] /= factorx
         kp[:,1] /= factory
+        for i in range (kp.shape[0]):
+            if kp[i, 0] == 0 or kp[i, 1] == 0:
+                kp[i, :] = 0
         kp = list(np.reshape(kp, (-1,)))
         keypoints.append(kp)
         sigmas.append(2.5)

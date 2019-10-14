@@ -103,17 +103,19 @@ def paser_func(img_id):
     bboxs = id_bboxs_dict[img_id]
     kps = id_kps_dict[img_id]
     img = cv2.imread(os.path.join(img_path, img_id+'.jpg'))
-    #  data aug
-    # img, bboxs, kps = data_aug(img, bboxs, kps)
 
-    # padding img
+     # data aug
+    img, bboxs, kps = data_aug(img, bboxs, kps)
+
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    h, w, c = img.shape
-    # 只在最右边或者最下边填充0, 这样不会影响box或者点的坐标值, 所以无需再对box或点的坐标做改变
-    if w > h:
-        img = cv2.copyMakeBorder(img, 0, w-h, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
-    else:
-        img = cv2.copyMakeBorder(img, 0, 0, 0, h-w, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+
+    # padding img 只在最右边或者最下边填充0, 这样不会影响box或者点的坐标值, 所以无需再对box或点的坐标做改变
+    # h, w, c = img.shape
+    # if w > h:
+    #     img = cv2.copyMakeBorder(img, 0, w-h, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+    # else:
+    #     img = cv2.copyMakeBorder(img, 0, 0, 0, h-w, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+    ############################################################################################
 
     # create center label
     orih, oriw, oric = img.shape
@@ -121,20 +123,14 @@ def paser_func(img_id):
     outh, outw = neth//params['scale'], netw//params['scale']
 
     centers, sigmas, whs = prepare_bbox(bboxs, orih, oriw, outh, outw)
-    # center_encoder = centerEncoder(outh, outw, centers, sigmas, whs)
-    # center_label = center_encoder()
-
-    # create keypoints label
     keypoints, kps_sigmas = prepare_kps(kps, orih, oriw, outh, outw)
-    # kps_encoder = kpsEncoder(outh, outw, centers, keypoints, sigmas=kps_sigmas)
-    # kps_label = kps_encoder()
 
     spm_label = SingleStageLabel(outh, outw, centers, sigmas, keypoints)
     label = spm_label()
 
     # create img input
     img = cv2.resize(img, (netw, neth), interpolation=cv2.INTER_CUBIC)
-    img = img.astype(np.float32) / 255. # conver to 0~1 tools if focal loss is right
+    img = img.astype(np.float32) / 255.
 
     # read by tensorflow, 不是很方便做iamge和box同时做数据增强
     # image = tf.io.read_file(os.path.join(img_path, img_id+'.jpg'))

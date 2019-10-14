@@ -47,7 +47,8 @@ class SpmDecoder():
                     # print (i, index)
                     if i == 0:
                         start_joint = [root_joint[1], root_joint[0]]
-                    if start_joint[0] >= kps_map.shape[1] or start_joint[1] >= kps_map.shape[0]:
+                    if start_joint[0] >= kps_map.shape[1] or start_joint[1] >= kps_map.shape[0] \
+                            or start_joint[0] < 0 or start_joint[1] < 0:
                         break
                     offset = kps_map[start_joint[1], start_joint[0], 2*index:2*index+2] * self.Z
                     # print (offset)

@@ -90,9 +90,9 @@ class SingleStageLabel():
                 if i == 0:
                     start_joint = center
                 end_joint = kps[3*index:3*index+3]
-                if start_joint[0] == 0 and start_joint[1] == 0:
+                if start_joint[0] == 0 or start_joint[1] == 0:
                     continue
-                if end_joint[0] == 0 and end_joint[1] == 0:
+                if end_joint[0] == 0 or end_joint[1] == 0:
                     continue
                 self.create_dense_displacement_map(index, start_joint, end_joint, taux, tauy)
                 start_joint = end_joint
