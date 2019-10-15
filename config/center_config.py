@@ -25,5 +25,5 @@ center_config['val_json_file'] = '/media/hsw/E/datasets/ai_challenger_valid_test
 center_config['val_img_path'] = '/media/hsw/E/datasets/ai_challenger_valid_test/ai_challenger_keypoint_validation_20170911/keypoint_validation_images_20170911'
 
 # center_config['finetune'] = '/media/hsw/E/ckpt/spm_net/2019-09-12-14-19'
-center_config['finetune'] = '/media/hsw/E/ckpt/spm_net'
+center_config['finetune'] = '/home/hsw/server/ckpt-74/ckpt-79'
 center_config['ckpt'] = '/media/hsw/E/ckpt/spm_net'

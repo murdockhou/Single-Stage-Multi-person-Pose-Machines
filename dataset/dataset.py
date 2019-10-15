@@ -26,7 +26,7 @@ id_kps_dict = None
 img_path = None
 params = center_params
 
-def get_dataset(mode = 'train'):
+def get_dataset(num_gpus = 1, mode = 'train'):
     assert mode in ['train', 'val']
     global id_bboxs_dict, img_path, params, id_kps_dict
 
@@ -51,7 +51,7 @@ def get_dataset(mode = 'train'):
     else:
         dataset = dataset.map(tf_parse_func_for_val, num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
-    dataset = dataset.batch(params['batch_size'], drop_remainder=True)
+    dataset = dataset.batch(params['batch_size'] * num_gpus, drop_remainder=True)
     dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 
     return dataset
