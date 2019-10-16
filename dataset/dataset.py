@@ -58,6 +58,7 @@ def get_dataset(num_gpus = 1, mode = 'train'):
 
 def tf_parse_func_for_val(img_id):
     [img_id, height, width, img] = tf.py_function(paser_func_for_val, [img_id], [tf.string, tf.float32, tf.float32, tf.float32])
+
     return img_id, height, width, img
 
 def paser_func_for_val(img_id):
@@ -90,6 +91,9 @@ def paser_func_for_val(img_id):
 
 def tf_parse_func(img_id):
     [img, label] = tf.py_function(paser_func, [img_id], [tf.float32, tf.float32])
+
+    img.set_shape([params['height'], params['width'], 3])
+    label.set_shape([params['height']//params['scale'], params['width']//params['scale'], 14*2+14*2+1])
     return img, label
 
 def paser_func(img_id):
