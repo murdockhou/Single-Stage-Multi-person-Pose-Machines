@@ -13,7 +13,7 @@ import cv2
 import numpy as np
 import os
 
-use_dataset = False
+use_dataset = True
 
 if use_dataset:
     import tensorflow as tf
@@ -23,7 +23,7 @@ if use_dataset:
     os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
     mode = 'train'
-    dataset = get_dataset(mode)
+    dataset = get_dataset(mode=mode)
 
     colors = [[0,0,255],[255,0,0],[0,255,0]]
     if mode == 'val':
@@ -121,14 +121,12 @@ else:
         keypoints, kps_sigmas = prepare_kps(kps, orih, oriw, outh, outw)
 
         spm_encoder = SingleStageLabel(outh, outw, centers, sigmas, keypoints)
-        spm_label = spm_encoder()
-
-        print (spm_label.shape)
+        center_map, kps_map, kps_map_weight = spm_encoder()
 
         factor_x = netw / outw
         facotr_y = neth / outh
         spm_decoer = SpmDecoder(factor_x, facotr_y, outw, outh)
-        joints, decode_centers = spm_decoer([spm_label[...,0:1], spm_label[...,1:2*14+1]])
+        joints, decode_centers = spm_decoer([center_map, kps_map])
 
         # create img input
         img = cv2.resize(img, (netw, neth), interpolation=cv2.INTER_CUBIC)

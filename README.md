@@ -1,10 +1,10 @@
 Unofficial implementation of arxiv paper ["Single-Stage Multi-Person Pose Machines"](https://arxiv.org/abs/1908.09220), detail imformation can see this paper or check this [csdn link](https://blog.csdn.net/Murdock_C/article/details/100545377) only for reference.
 
 ## Requirement
-* tensorflow 2.0
+* tensorflow 2.0.0
 * python 3.6
 * cuda 10
-* [imgaug](https://github.com/aleju/imgaug)
+* [imgaug](https://github.com/aleju/imgaug) == 0.3.0
 
 ## Train Dataset
 
@@ -14,11 +14,17 @@ we use ai-challenger format dataset, which can found in this [website](https://c
 
 In this repo, just use [hrnet](https://github.com/VXallset/deep-high-resolution-net.TensorFlow) as for its body network, you can replace this body with any other network as you like. Please check for here: **`nets/spm_model.py`** 
 
-## Train
+## Single Gpu Training
 
 `python3 main.py`
 
 All config can be found in `config/center_config.py`
+
+## Multi-GPU Training
+
+`python3 distribute_main.py`
+
+**Note that if you have four gpus and its ids is [0, 1, 2, 3], and you want to use gpu id [2, 3] is not work very well for now. You can only use gpu id [0, 1] or [0, 1, 2] will work fine. I didn't know why and wish someone can tell me.**
 
 ## Test on images
 
