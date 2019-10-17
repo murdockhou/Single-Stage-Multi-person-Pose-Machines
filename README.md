@@ -42,6 +42,10 @@ eval
 
 detailed information can be found [here](https://github.com/AIChallenger/AI_Challenger_2017/tree/master/Evaluation/keypoint_eval) 
 
+## About loss
+
+In `spm_loss` function, you need carefully to set value of two different kinds of losses in order to make them balanced in numerical.
+
 ## ai_formate joints:
 
  1. right_shoulder 

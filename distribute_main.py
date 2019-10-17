@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
 
     def spm_loss(gt_root_joint, gt_joint_offset, gt_joint_offset_weight, preds):
-        root_weight = 10
+        root_weight = 0.001
         joint_weight = 1
 
         # gt_root_joint = label[..., 0:1]
