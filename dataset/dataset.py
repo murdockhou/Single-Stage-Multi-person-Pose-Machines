@@ -90,11 +90,14 @@ def paser_func_for_val(img_id):
     return img_id, orih, oriw, img
 
 def tf_parse_func(img_id):
-    [img, label] = tf.py_function(paser_func, [img_id], [tf.float32, tf.float32])
+    [img, center_map, kps_map, kps_map_weight] = tf.py_function(paser_func, [img_id], [tf.float32, tf.float32, tf.float32, tf.float32])
 
     img.set_shape([params['height'], params['width'], 3])
-    label.set_shape([params['height']//params['scale'], params['width']//params['scale'], 14*2+14*2+1])
-    return img, label
+    center_map.set_shape([params['height']//params['scale'], params['width']//params['scale'], 1])
+    kps_map.set_shape([params['height']//params['scale'], params['width']//params['scale'], 14*2])
+    kps_map_weight.set_shape([params['height']//params['scale'], params['width']//params['scale'], 14*2])
+    # label.set_shape([params['height']//params['scale'], params['width']//params['scale'], 14*2+14*2+1])
+    return img, center_map, kps_map, kps_map_weight
 
 def paser_func(img_id):
     global id_bboxs_dict, params, img_path, id_kps_dict
@@ -130,7 +133,7 @@ def paser_func(img_id):
     keypoints, kps_sigmas = prepare_kps(kps, orih, oriw, outh, outw)
 
     spm_label = SingleStageLabel(outh, outw, centers, sigmas, keypoints)
-    label = spm_label()
+    center_map, kps_map, kps_map_weight = spm_label()
 
     # create img input
     img = cv2.resize(img, (netw, neth), interpolation=cv2.INTER_CUBIC)
@@ -143,4 +146,4 @@ def paser_func(img_id):
     # image = tf.image.resize_with_pad(image, netw, neth)
 
     # label = np.concatenate([center_label, kps_label], axis=-1)
-    return img, label
+    return img, center_map, kps_map, kps_map_weight

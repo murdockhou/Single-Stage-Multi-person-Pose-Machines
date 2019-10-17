@@ -15,7 +15,7 @@ netH = params['height']
 netW = params['width']
 score = 0.6
 dist = 20
-ckpt_path = '/home/hsw/server/ckpt-74/ckpt-82'
+ckpt_path = '/home/hsw/server/ckpt-74/ckpt-80'
 
 # params['val_json_file'] = 'jsons/val_500.json'
 

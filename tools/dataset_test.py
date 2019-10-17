@@ -13,7 +13,7 @@ import cv2
 import numpy as np
 import os
 
-use_dataset = True
+use_dataset = False
 
 if use_dataset:
     import tensorflow as tf
@@ -40,7 +40,7 @@ if use_dataset:
                 break
     else:
         for epco in range(1):
-            for step, (img, label) in enumerate(dataset):
+            for step, (img, center_map, kps_map, kps_map_weight) in enumerate(dataset):
                 # print (step)
                 # print (img[0].shape)
                 # img1 = img[0]
@@ -49,10 +49,8 @@ if use_dataset:
                 print ('epoch {} / step {}'.format(epco, step))
                 img = (img.numpy()[0] * 255).astype(np.uint8)
 
-                label = label[0]
-
                 spm_decoder = SpmDecoder(4, 4, center_config['height']//4, center_config['width']//4)
-                joints, centers = spm_decoder([label[...,0:1], label[...,1:2*14+1]])
+                joints, centers = spm_decoder([center_map[0], kps_map[0]])
 
                 for j,  single_person_joints in enumerate(joints):
                     cv2.circle(img, (int(centers[j][0]), int(centers[j][1])), 8, colors[j%3], thickness=-1)
@@ -124,6 +122,8 @@ else:
 
         spm_encoder = SingleStageLabel(outh, outw, centers, sigmas, keypoints)
         spm_label = spm_encoder()
+
+        print (spm_label.shape)
 
         factor_x = netw / outw
         facotr_y = neth / outh

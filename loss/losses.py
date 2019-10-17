@@ -110,14 +110,14 @@ def keypoints_loss(gt_center_kps_offset, gt_center_kps_mask, pred_center_kps_off
 
     return loss,  [center_kps_offset_loss, heatmap_loss, kps_offset]
 
-def spm_loss(label, preds):
+def spm_loss(gt_root_joint, gt_joint_offset, gt_joint_offset_weight, preds):
 
     root_weight = 10
     joint_weight = 1
-
-    gt_root_joint = label[...,0:1]
-    gt_joint_offset = label[...,1:2*14+1]
-    gt_joint_offset_weight = label[..., 2*14+1:]
+    #
+    # gt_root_joint = label[...,0:1]
+    # gt_joint_offset = label[...,1:2*14+1]
+    # gt_joint_offset_weight = label[..., 2*14+1:]
 
     pred_root_joint = preds[0]
     pred_joint_offset = preds[1]

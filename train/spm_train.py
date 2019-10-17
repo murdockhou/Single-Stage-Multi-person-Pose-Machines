@@ -32,11 +32,10 @@ def train(model, optimizer, dataset, epochs, cur_time='8888-88-88-88'):
         manager = tf.train.CheckpointManager(ckpt, os.path.join(center_config['ckpt'], cur_time), max_to_keep=200)
 
     for epoch in range(epochs):
-        for step, (img, label) in enumerate(dataset):
-            img = tf.reshape(img, shape=(-1, center_config['height'], center_config['width'], 3))
+        for step, (img, center_map, kps_map, kps_map_weight) in enumerate(dataset):
             with tf.GradientTape() as tape:
                 preds = infer(model, img)
-                loss = spm_loss(label, preds)
+                loss = spm_loss(center_map, kps_map, kps_map_weight, preds)
             grads = tape.gradient(loss[0], model.trainable_variables)
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
             ckpt.step.assign_add(1)
@@ -44,7 +43,7 @@ def train(model, optimizer, dataset, epochs, cur_time='8888-88-88-88'):
             tf.summary.scalar('root_joint_loss', loss[1], step=int(ckpt.step))
             tf.summary.scalar('offset_loss', loss[2], step=int(ckpt.step))
             if step % 100 == 0:
-                gt_root_joints = label[..., 0:1]
+                gt_root_joints = center_map
                 pred_root_joints = preds[0]
                 tf.summary.image('gt_root_joints', gt_root_joints, step=int(ckpt.step), max_outputs=3)
                 tf.summary.image('pred_root_joints',pred_root_joints, step=int(ckpt.step), max_outputs=3)

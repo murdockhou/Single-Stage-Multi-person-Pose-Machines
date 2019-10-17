@@ -75,7 +75,8 @@ class SingleStageLabel():
         self.kps_count[self.kps_count == 0] += 1
         self.kps_map = np.divide(self.kps_map, self.kps_count)
 
-        return np.concatenate([self.center_map, self.kps_map, self.kps_map_weight], axis=-1)
+        # return np.concatenate([self.center_map, self.kps_map, self.kps_map_weight], axis=-1)
+        return self.center_map, self.kps_map, self.kps_map_weight
 
     def body_joint_displacement(self, center, kps, sigma):
         # taux = sigma[0]
