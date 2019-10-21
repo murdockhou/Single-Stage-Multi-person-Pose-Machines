@@ -45,10 +45,10 @@ def run(model, img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     h, w, c = img.shape
     # 只在最右边或者最下边填充0, 这样不会影响box或者点的坐标值, 所以无需再对box或点的坐标做改变
-    if w > h:
-        img = cv2.copyMakeBorder(img, 0, w - h, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
-    else:
-        img = cv2.copyMakeBorder(img, 0, 0, 0, h - w, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+    #if w > h:
+    #    img = cv2.copyMakeBorder(img, 0, w - h, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+    #else:
+    #    img = cv2.copyMakeBorder(img, 0, 0, 0, h - w, cv2.BORDER_CONSTANT, value=(0, 0, 0))
 
     img_ori = img.copy()
     img = cv2.resize(img, (netH, netW), interpolation=cv2.INTER_CUBIC)
@@ -76,7 +76,7 @@ def run(model, img):
 
 if __name__ == '__main__':
 
-    use_gpu = True
+    use_gpu = False
     use_nms = True
 
     if use_gpu:
@@ -98,9 +98,9 @@ if __name__ == '__main__':
             run(model, img)
             ret, img = cap.read()
     elif os.path.isdir(args.imgs):
-        for img_name in os.listdir(img_path):
+        for img_name in os.listdir(args.imgs):
             print('----------------------------------------------')
-            img = cv2.imread(os.path.join(img_path, img_name))
+            img = cv2.imread(os.path.join(args.imgs, img_name))
             run(model, img)
     elif os.path.isfile(args.imgs):
         img = cv2.imread(args.imgs)

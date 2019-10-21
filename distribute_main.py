@@ -38,8 +38,16 @@ if __name__ == '__main__':
         print(dist_dataset.__dict__['_cloned_datasets'])
 
 
+    def SmoothL1Loss(label, pred):
+        t = tf.abs(label - pred)
+        return tf.reduce_mean(
+            tf.where(
+                t <= 1, 0.5*t*t, 0.5*(t-1)
+            )
+        )
+
     def spm_loss(gt_root_joint, gt_joint_offset, gt_joint_offset_weight, preds):
-        root_weight = 0.001
+        root_weight = 10
         joint_weight = 1
 
         # gt_root_joint = label[..., 0:1]
@@ -49,12 +57,15 @@ if __name__ == '__main__':
         pred_root_joint = preds[0]
         pred_joint_offset = preds[1]
 
-        root_joint_loss = tf.reduce_sum(tf.nn.l2_loss(pred_root_joint - gt_root_joint))
+        # root_joint_loss = tf.reduce_sum(tf.nn.l2_loss(pred_root_joint - gt_root_joint))
+        root_joint_loss = tf.reduce_mean(tf.keras.losses.MSE(gt_root_joint, pred_root_joint))
 
         # huber loss 就是 smooth l1 loss，和pytorch中的torch.nn.SmoothL1Loss()结果一致
-        huber_loss = tf.losses.Huber(reduction=tf.keras.losses.Reduction.NONE)
-        pred_joint_loss = tf.reduce_sum(huber_loss(gt_joint_offset * gt_joint_offset_weight,
-                                                   pred_joint_offset * gt_joint_offset_weight))
+        # huber_loss = tf.losses.Huber(reduction=tf.keras.losses.Reduction.NONE)
+        # pred_joint_loss = tf.reduce_sum(huber_loss(gt_joint_offset * gt_joint_offset_weight,
+        #                                            pred_joint_offset * gt_joint_offset_weight))
+
+        pred_joint_loss = SmoothL1Loss(gt_joint_offset * gt_joint_offset_weight, pred_joint_offset * gt_joint_offset_weight)
 
         return root_weight * root_joint_loss + joint_weight * pred_joint_loss
 
@@ -65,7 +76,7 @@ if __name__ == '__main__':
             with tf.GradientTape() as tape:
                 preds = model(img)
                 loss = spm_loss(center_map, kps_map, kps_map_weight, preds) * (
-                            1.0 / center_config['batch_size'] * len(gpu_ids))
+                            1.0 / (center_config['batch_size'] * len(gpu_ids)))
             grads = tape.gradient(loss, model.trainable_variables)
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
