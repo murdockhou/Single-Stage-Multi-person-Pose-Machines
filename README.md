@@ -1,5 +1,10 @@
 Unofficial implementation of arxiv paper ["Single-Stage Multi-Person Pose Machines"](https://arxiv.org/abs/1908.09220), detail imformation can see this paper or check this [csdn link](https://blog.csdn.net/Murdock_C/article/details/100545377) only for reference.
 
+## TODO
+ 
+- [ ] custom distribute training is not work well, I trained for 10 epochs and nothing can be learned at all. So if anyone is familiar with this, please help me to check it and make it work.
+- [ ] using tf.keras to run distribute training 
+
 ## Requirement
 * tensorflow 2.0.0
 * python 3.6
@@ -22,7 +27,7 @@ All config can be found in `config/center_config.py`
 
 ## Multi-GPU Training
 
-`python3 distribute_main.py`
+`python3 distribute/custom_train.py`
 
 **Note that if you have four gpus and its ids is [0, 1, 2, 3], and you want to use gpu id [2, 3] is not work very well for now. You can only use gpu id [0, 1] or [0, 1, 2] will work fine. I didn't know why and wish someone can tell me.**
 

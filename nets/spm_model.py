@@ -21,7 +21,7 @@ def SpmModel(inputs, num_joints, is_training = True):
     displacement = head_net(body, 2*num_joints, name='reg_map', bn=False)
     # preds = head_net(preds, 1+2*num_joints, name='preds', bn=False)
 
-    return [rootJoints, displacement]
+    return rootJoints, displacement
 
 def head_net(inputs, output_c, name='', bn=True, training=True):
     out = tf.keras.layers.Conv2D(filters=256, kernel_size=3, padding='same',

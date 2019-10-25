@@ -59,6 +59,11 @@ def get_dataset(num_gpus = 1, mode = 'train'):
 def tf_parse_func_for_val(img_id):
     [img_id, height, width, img] = tf.py_function(paser_func_for_val, [img_id], [tf.string, tf.float32, tf.float32, tf.float32])
 
+    # img_id.set_shape([1,])
+    # height.set_shape([1,])
+    # width.set_shape([1,])
+    img.set_shape([params['height'], params['width'], 3])
+
     return img_id, height, width, img
 
 def paser_func_for_val(img_id):
@@ -76,10 +81,10 @@ def paser_func_for_val(img_id):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     h, w, c = img.shape
     # 只在最右边或者最下边填充0, 这样不会影响box或者点的坐标值, 所以无需再对box或点的坐标做改变
-    if w > h:
-        img = cv2.copyMakeBorder(img, 0, w - h, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
-    else:
-        img = cv2.copyMakeBorder(img, 0, 0, 0, h - w, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+    # if w > h:
+    #     img = cv2.copyMakeBorder(img, 0, w - h, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+    # else:
+    #     img = cv2.copyMakeBorder(img, 0, 0, 0, h - w, cv2.BORDER_CONSTANT, value=(0, 0, 0))
 
     # create img input
     orih, oriw, oric = img.shape

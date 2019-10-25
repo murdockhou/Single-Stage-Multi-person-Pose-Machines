@@ -38,36 +38,23 @@ if __name__ == '__main__':
         print(dist_dataset.__dict__['_cloned_datasets'])
 
 
-    def SmoothL1Loss(label, pred):
-        t = tf.abs(label - pred)
-        return tf.reduce_mean(
-            tf.where(
-                t <= 1, 0.5*t*t, 0.5*(t-1)
-            )
-        )
+    with strategy.scope():
+        def SmoothL1Loss(label, pred, weight):
 
-    def spm_loss(gt_root_joint, gt_joint_offset, gt_joint_offset_weight, preds):
-        root_weight = 10
-        joint_weight = 1
+            huber_loss = tf.losses.Huber(reduction=tf.keras.losses.Reduction.NONE)
 
-        # gt_root_joint = label[..., 0:1]
-        # gt_joint_offset = label[..., 1:2 * 14 + 1]
-        # gt_joint_offset_weight = label[..., 2 * 14 + 1:]
+            return huber_loss(label * weight, pred * weight)
 
-        pred_root_joint = preds[0]
-        pred_joint_offset = preds[1]
+        def L2Loss(label, pred):
+            return tf.nn.l2_loss(label - pred)
 
-        # root_joint_loss = tf.reduce_sum(tf.nn.l2_loss(pred_root_joint - gt_root_joint))
-        root_joint_loss = tf.reduce_mean(tf.keras.losses.MSE(gt_root_joint, pred_root_joint))
+        def comput_loss(center_map, kps_map, kps_map_weight, preds):
+            kps_loss = SmoothL1Loss(kps_map, preds[1], kps_map_weight)
+            root_loss = L2Loss(center_map, preds[0])
 
-        # huber loss 就是 smooth l1 loss，和pytorch中的torch.nn.SmoothL1Loss()结果一致
-        # huber_loss = tf.losses.Huber(reduction=tf.keras.losses.Reduction.NONE)
-        # pred_joint_loss = tf.reduce_sum(huber_loss(gt_joint_offset * gt_joint_offset_weight,
-        #                                            pred_joint_offset * gt_joint_offset_weight))
+            per_example_loss = kps_loss + root_loss
 
-        pred_joint_loss = SmoothL1Loss(gt_joint_offset * gt_joint_offset_weight, pred_joint_offset * gt_joint_offset_weight)
-
-        return root_weight * root_joint_loss + joint_weight * pred_joint_loss
+            return tf.nn.compute_average_loss(per_example_loss, global_batch_size=center_config['batch_size']*len(gpu_ids))
 
 
     with strategy.scope():
@@ -75,8 +62,8 @@ if __name__ == '__main__':
             img, center_map, kps_map, kps_map_weight = inputs
             with tf.GradientTape() as tape:
                 preds = model(img)
-                loss = spm_loss(center_map, kps_map, kps_map_weight, preds) * (
-                            1.0 / (center_config['batch_size'] * len(gpu_ids)))
+                loss = comput_loss(center_map, kps_map, kps_map_weight, preds)
+
             grads = tape.gradient(loss, model.trainable_variables)
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
@@ -84,8 +71,8 @@ if __name__ == '__main__':
 
 
         @tf.function
-        def distribute_train_step(inputs):
-            per_replica_loss = strategy.experimental_run_v2(train_step, args=(inputs,))
+        def distribute_train_step(dataset_inputs):
+            per_replica_loss = strategy.experimental_run_v2(train_step, args=(dataset_inputs,))
             return strategy.reduce(tf.distribute.ReduceOp.SUM, per_replica_loss, axis=None)
 
 
@@ -97,6 +84,6 @@ if __name__ == '__main__':
                 total_loss += distribute_train_step(x)
                 train_batchs += 1
 
+            checkpoint.save(checkpoint_prefix)
             template = ('Epoch: {}, Train Steps: {}, Train Ave Loss: {}')
             print(template.format(epoch, train_batchs, total_loss / train_batchs))
-            print('Model saved in {} '.format(checkpoint.save(checkpoint_prefix)))
