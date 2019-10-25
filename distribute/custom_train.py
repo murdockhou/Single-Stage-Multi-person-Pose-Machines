@@ -40,13 +40,16 @@ if __name__ == '__main__':
 
     with strategy.scope():
         def SmoothL1Loss(label, pred, weight):
+            t = tf.abs(label * weight - pred * weight)
 
-            huber_loss = tf.losses.Huber(reduction=tf.keras.losses.Reduction.NONE)
-
-            return huber_loss(label * weight, pred * weight)
+            return tf.reduce_mean(
+                tf.where(
+                    t <= 1, 0.5 * t * t, 0.5 * (t - 1)
+                )
+            )
 
         def L2Loss(label, pred):
-            return tf.nn.l2_loss(label - pred)
+            return tf.reduce_mean(tf.losses.mse(label, pred))
 
         def comput_loss(center_map, kps_map, kps_map_weight, preds):
             kps_loss = SmoothL1Loss(kps_map, preds[1], kps_map_weight)
