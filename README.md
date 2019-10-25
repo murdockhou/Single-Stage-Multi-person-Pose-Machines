@@ -29,7 +29,18 @@ All config can be found in `config/center_config.py`
 
 `python3 distribute/custom_train.py`
 
-**Note that if you have four gpus and its ids is [0, 1, 2, 3], and you want to use gpu id [2, 3] is not work very well for now. You can only use gpu id [0, 1] or [0, 1, 2] will work fine. I didn't know why and wish someone can tell me.**
+~~**Note that if you have four gpus and its ids is [0, 1, 2, 3], and you want to use gpu id [2, 3] is not work very well for now. You can only use gpu id [0, 1] or [0, 1, 2] will work fine. I didn't know why and wish someone can tell me.**~~ 
+
+The reason why we set `os.environ['CUDA_VISIBLE_DEVICES'] = '2, 3'` but can not use ` gpu_ids = [2, 3] ` is that tensorflow has already make gpu 2/3 on machine re-declear to 0/1. So, if we want to use `gpu_ids = [2, 3]`, just write:
+
+```
+os.environ['CUDA_VISIBLE_DEVICES'] = '2, 3'
+gpu_ids = [0, 1]
+devices = ['/device:GPU:{}'.format(i) for i in gpu_ids]
+strategy = tf.distribute.MirroredStrategy(devices=devices)
+```
+in using distribute training.
+  
 
 ## Test on images
 
