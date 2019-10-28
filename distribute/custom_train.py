@@ -27,9 +27,9 @@ if __name__ == '__main__':
         outputs = SpmModel(inputs, num_joints=center_config['joints'], is_training=True)
         model = tf.keras.Model(inputs, outputs)
         optimizer = tf.optimizers.Adam(learning_rate=3e-4)
-        checkpoint = tf.train.Checkpoint(optimizer=optimizer, model=model)
+        checkpoint = tf.train.Checkpoint(optimizer=optimizer, net=model)
         if center_config['finetune'] is not None:
-            checkpoint.restore(center_config['finetune'])
+            checkpoint.restore(center_config['finetune']).assert_existing_objects_matched()
             print('Successfully restore model from {}'.format(center_config['finetune']))
 
     with strategy.scope():

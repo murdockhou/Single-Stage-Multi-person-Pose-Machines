@@ -19,12 +19,14 @@ from decoder.decode_spm import SpmDecoder
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--video', default=None, type=str)
-parser.add_argument('--imgs', default=None, type=str)
+parser.add_argument('--imgs',
+                    default='/media/hsw/E/datasets/ai_challenger_valid_test/ai_challenger_keypoint_test_b_20180103/keypoint_test_b_images_20180103',
+                    type=str)
 parser.add_argument('--score', default=0.6, type=float)
 parser.add_argument('--dist', default=20., type=float)
 parser.add_argument('--netH', default=512, type=int)
 parser.add_argument('--netW', default=512, type=int)
-parser.add_argument('--ckpt', default='/home/hsw/server/ckpt-74/ckpt-79', type=str)
+parser.add_argument('--ckpt', default=None, type=str)
 args = parser.parse_args()
 
 colors = [[0,0,255],[255,0,0],[0,255,0],[0,255,255],[255,0,255],[255,255,0]]
@@ -76,7 +78,7 @@ def run(model, img):
 
 if __name__ == '__main__':
 
-    use_gpu = False
+    use_gpu = True
     use_nms = True
 
     if use_gpu:
@@ -88,8 +90,26 @@ if __name__ == '__main__':
     outputs = SpmModel(inputs, 14, is_training=False)
     model = tf.keras.Model(inputs, outputs)
 
+    assert args.ckpt is not None
+
+    # model.load_weights(args.ckpt, by_name=True)
     ckpt = tf.train.Checkpoint(net=model)
-    ckpt.restore(args.ckpt)
+    ckpt.restore(args.ckpt).assert_existing_objects_matched()
+
+    # list1 = tf.train.list_variables('/home/hsw/server/multi_pose/spm/models/bak/ckpt-2')
+    # list2 = tf.train.list_variables('/home/hsw/server/ckpt-74/ckpt-79')
+    #
+    # for n, i in enumerate(list1):
+    #     print (i)
+    #     if n == 20:
+    #         break
+    # for n, i in enumerate(list2):
+    #     print (i)
+    #     if n == 20:
+    #         break
+    # diff = [i for i in list1 if i not in list2]
+    # print (diff)
+    # exit(0)
 
     if args.video is not None:
         cap = cv2.VideoCapture(args.video)
