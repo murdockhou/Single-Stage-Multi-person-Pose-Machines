@@ -6,7 +6,7 @@ Unofficial implementation of arxiv paper ["Single-Stage Multi-Person Pose Machin
 The custom distribute training is right, but I write `checkpoint = tf.train.Checkpoint(optimizer=optimizer, model=model)` is different with in `spm_model.py`. Because I write`checkpoint = tf.train.Checkpoint(optimizer=optimizer, net=model)` in `spm_model.py`, the parameter in `tf.train.Checkpoint`
 is different, one is `net=model` and another is `model=model`. So, if I use checkpoints saved by  `checkpoint = tf.train.Checkpoint(optimizer=optimizer, model=model)`, it is impossible using `checkpoint = tf.train.Checkpoint(optimizer=optimizer, net=model)` to restore it. So, we must keep parameters in `tf.train.Checkpoint` as same as possible.
 By the way, it's a good way add `checkpoint.restore(ckpt_path).assert_existing_objects_matched()` to find restore error as soon as possible.
-- [ ] using tf.keras to run distribute training 
+- [x] using tf.keras to run distribute training 
 
 ## Requirement
 * tensorflow 2.0.0
