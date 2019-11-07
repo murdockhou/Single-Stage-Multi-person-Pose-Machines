@@ -116,6 +116,8 @@ def paser_func(img_id):
     kps = id_kps_dict[img_id]
     img = cv2.imread(os.path.join(img_path, img_id+'.jpg'))
 
+
+
      # data aug
     img, bboxs, kps = data_aug(img, bboxs, kps)
 

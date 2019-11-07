@@ -310,7 +310,7 @@ def prepare_kps(kps, orih, oriw, outh, outw):
         kp[:,0] /= factorx
         kp[:,1] /= factory
         for i in range (kp.shape[0]):
-            if kp[i, 0] == 0 or kp[i, 1] == 0:
+            if kp[i, 0] == 0 or kp[i, 1] == 0 or kp[i, 2] == -1:
                 kp[i, :] = 0
         kp = list(np.reshape(kp, (-1,)))
         keypoints.append(kp)
@@ -345,6 +345,10 @@ def read_json(json_file):
 
         kps = []
         for human, kp in anno['keypoint_annotations'].items():
+            # set v=-1 for point is (0, 0) or (0, x) or (x, 0)
+            for i in range(14):
+                if kp[3*i+0] == 0 or kp[3*i+1] == 0:
+                    kp[3*i+2] = -1
             kps.append(kp)
         id_kps_dict[img_id] = kps
 
