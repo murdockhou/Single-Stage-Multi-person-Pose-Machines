@@ -45,7 +45,7 @@ if __name__ =='__main__':
 
 
         model.compile(loss={'root_joints_conv1x1': MSELoss, 'reg_map_conv1x1': SmoothL1Loss},
-                      loss_weights={'root_joints_conv1x1': 1, 'reg_map_conv1x1': 2},
+                      loss_weights={'root_joints_conv1x1': 1, 'reg_map_conv1x1': 1},
                       optimizer=tf.keras.optimizers.Adam(1e-4))
 
         if params['finetune'] is not None:
@@ -60,17 +60,26 @@ if __name__ =='__main__':
             yield input, {'root_joints_conv1x1':output1, 'reg_map_conv1x1':output2}
 
 
+    def step_lr(epoch):
+        if epoch < 20:
+            return 1e-3
+        elif epoch < 50:
+            return 1e-4
+        else:
+            return 1e-5
+
     # def callbacks
     callbacks = [
         tf.keras.callbacks.TensorBoard(log_dir='keras/logs', write_graph=True, update_freq=100),
         tf.keras.callbacks.ModelCheckpoint(filepath='keras/ckpt_{epoch}', monitor='val_loss', verbose=1, save_weights_only=True),
+        tf.keras.callbacks.LearningRateScheduler(schedule=step_lr, verbose=1)
     ]
 
     # start training
     # model.fit_generator(generator(train_dataset), steps_per_epoch=10000, epochs=5, callbacks=callbacks,
     #                     validation_data=generator(test_dataset), validation_steps=10)
-    model.fit(generator(train_dataset), steps_per_epoch=10000, epochs=5, callbacks=callbacks,
-                        validation_data=generator(test_dataset), validation_steps=10)
+    model.fit(generator(train_dataset), steps_per_epoch=210000//(len(gpu_ids)*params['batch_size']), epochs=80, callbacks=callbacks,
+                        validation_data=generator(test_dataset), validation_steps=30000//((gpu_ids)*params['batch_size']))
 
 
 

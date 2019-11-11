@@ -19,7 +19,6 @@ def SpmModel(inputs, num_joints, is_training = True):
     body = head_net(body, 256, name='head', training=is_training)
     rootJoints = head_net(body, 1, name='root_joints', bn=False)
     displacement = head_net(body, 2*num_joints, name='reg_map', bn=False)
-    # preds = head_net(preds, 1+2*num_joints, name='preds', bn=False)
 
     return rootJoints, displacement
 
