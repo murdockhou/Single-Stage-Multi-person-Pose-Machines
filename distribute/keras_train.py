@@ -79,7 +79,7 @@ if __name__ =='__main__':
     # model.fit_generator(generator(train_dataset), steps_per_epoch=10000, epochs=5, callbacks=callbacks,
     #                     validation_data=generator(test_dataset), validation_steps=10)
     model.fit(generator(train_dataset), steps_per_epoch=210000//(len(gpu_ids)*params['batch_size']), epochs=80, callbacks=callbacks,
-                        validation_data=generator(test_dataset), validation_steps=30000//((gpu_ids)*params['batch_size']))
+                        validation_data=generator(test_dataset), validation_steps=30000//(len(gpu_ids)*params['batch_size']))
 
 
 
