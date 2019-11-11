@@ -1,7 +1,7 @@
 import tensorflow as tf
 from dataset.dataset import get_dataset
 from nets.spm_model import SpmModel
-from config.center_config import center_config
+from config.spm_config import spm_config as params
 
 import os
 import datetime
@@ -23,14 +23,14 @@ if __name__ == '__main__':
     epochs = 5
 
     with strategy.scope():
-        inputs = tf.keras.Input(shape=(center_config['height'], center_config['width'], 3), name='modelInput')
-        outputs = SpmModel(inputs, num_joints=center_config['joints'], is_training=True)
+        inputs = tf.keras.Input(shape=(params['height'], params['width'], 3), name='modelInput')
+        outputs = SpmModel(inputs, num_joints=params['joints'], is_training=True)
         model = tf.keras.Model(inputs, outputs)
         optimizer = tf.optimizers.Adam(learning_rate=3e-4)
         checkpoint = tf.train.Checkpoint(optimizer=optimizer, net=model)
-        if center_config['finetune'] is not None:
-            checkpoint.restore(center_config['finetune']).assert_existing_objects_matched()
-            print('Successfully restore model from {}'.format(center_config['finetune']))
+        if params['finetune'] is not None:
+            checkpoint.restore(params['finetune']).assert_existing_objects_matched()
+            print('Successfully restore model from {}'.format(params['finetune']))
 
     with strategy.scope():
         dataset = get_dataset(len(gpu_ids))
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
             per_example_loss = kps_loss + root_loss
 
-            return tf.nn.compute_average_loss(per_example_loss, global_batch_size=center_config['batch_size']*len(gpu_ids))
+            return tf.nn.compute_average_loss(per_example_loss, global_batch_size=params['batch_size']*len(gpu_ids))
 
 
     with strategy.scope():

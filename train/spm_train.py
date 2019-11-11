@@ -11,7 +11,7 @@
 
 import tensorflow as tf
 from loss.losses import spm_loss
-from config.center_config import center_config
+from config.spm_config import spm_config as params
 
 import os
 
@@ -24,12 +24,12 @@ def infer(model, inputs):
 
 def train(model, optimizer, dataset, epochs, cur_time='8888-88-88-88'):
     ckpt = tf.train.Checkpoint(step=tf.Variable(1), optimizer=optimizer, net=model)
-    if center_config['finetune'] is not None:
-        manager = tf.train.CheckpointManager(ckpt, center_config['finetune'], max_to_keep=200)
-        ckpt.restore(center_config['finetune'])
-        print('successfully restore model from ... {}'.format(center_config['finetune']))
+    if params['finetune'] is not None:
+        manager = tf.train.CheckpointManager(ckpt, params['finetune'], max_to_keep=200)
+        ckpt.restore(params['finetune'])
+        print('successfully restore model from ... {}'.format(params['finetune']))
     else:
-        manager = tf.train.CheckpointManager(ckpt, os.path.join(center_config['ckpt'], cur_time), max_to_keep=200)
+        manager = tf.train.CheckpointManager(ckpt, os.path.join(params['ckpt'], cur_time), max_to_keep=200)
 
     for epoch in range(epochs):
         for step, (img, center_map, kps_map, kps_map_weight) in enumerate(dataset):

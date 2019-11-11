@@ -1,7 +1,7 @@
 import tensorflow as tf
 from distribute.utils_keras.keras_dataset import  get_dataset
 from nets.spm_model import SpmModel
-from config.center_config import center_config as params
+from config.spm_config import spm_config as params
 
 import os
 
@@ -47,6 +47,9 @@ if __name__ =='__main__':
         model.compile(loss={'root_joints_conv1x1': MSELoss, 'reg_map_conv1x1': SmoothL1Loss},
                       loss_weights={'root_joints_conv1x1': 1, 'reg_map_conv1x1': 2},
                       optimizer=tf.keras.optimizers.Adam(1e-4))
+
+        if params['finetune'] is not None:
+            model.load_weights(params['finetune'])
 
 
     # define dataset

@@ -19,7 +19,7 @@ if use_dataset:
     import tensorflow as tf
     from decoder.decode_spm import SpmDecoder
     from dataset.dataset import get_dataset
-    from config.center_config import center_config
+    from config.spm_config import spm_config as params
     os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
     mode = 'train'
@@ -49,7 +49,7 @@ if use_dataset:
                 print ('epoch {} / step {}'.format(epco, step))
                 img = (img.numpy()[0] * 255).astype(np.uint8)
 
-                spm_decoder = SpmDecoder(4, 4, center_config['height']//4, center_config['width']//4)
+                spm_decoder = SpmDecoder(4, 4, params['height']//4, params['width']//4)
                 joints, centers = spm_decoder([center_map[0], kps_map[0]])
 
                 for j,  single_person_joints in enumerate(joints):
@@ -67,7 +67,7 @@ if use_dataset:
 # tools on label without dataset
 else:
     from utils.utils import *
-    from config.center_config import center_config as params
+    from config.spm_config import spm_config as params
     from encoder.spm import SingleStageLabel
     from decoder.decode_spm import SpmDecoder
     from utils.data_aug import data_aug

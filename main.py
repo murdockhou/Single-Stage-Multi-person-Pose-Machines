@@ -12,7 +12,7 @@
 import tensorflow as tf
 from dataset.dataset import get_dataset
 from nets.spm_model import SpmModel
-from config.center_config import center_config
+from config.spm_config import spm_config as params
 from train.spm_train import train
 
 import os
@@ -23,9 +23,9 @@ if __name__ == '__main__':
 
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
-    inputs = tf.keras.Input(shape=(center_config['height'], center_config['width'], 3),name='modelInput')
-    # outputs = center_net_model(inputs, num_joints=center_config['joints'], training=True)
-    outputs = SpmModel(inputs, num_joints=center_config['joints'], is_training=True)
+    inputs = tf.keras.Input(shape=(params['height'], params['width'], 3),name='modelInput')
+    # outputs = center_net_model(inputs, num_joints=params['joints'], training=True)
+    outputs = SpmModel(inputs, num_joints=params['joints'], is_training=True)
     model = tf.keras.Model(inputs, outputs)
 
     cur_time = datetime.datetime.fromtimestamp(datetime.datetime.now().timestamp()).strftime('%Y-%m-%d-%H-%M')

@@ -11,6 +11,7 @@
 
 import numpy as np
 import json
+from config.spm_config import spm_config as params
 
 def draw_ttfnet_gaussian(heatmap, center, sigmax, sigmay, mask=None):
     # print (sigmax, sigmay)
@@ -314,7 +315,7 @@ def prepare_kps(kps, orih, oriw, outh, outw):
                 kp[i, :] = 0
         kp = list(np.reshape(kp, (-1,)))
         keypoints.append(kp)
-        sigmas.append(2.5)
+        sigmas.append(params['kps_sigma'])
     return keypoints,sigmas
 
 def prepare_annos(bboxs, kps, orih, oriw, outh, outw):

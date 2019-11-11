@@ -16,7 +16,7 @@ import json
 import cv2
 import os
 import math
-from config.center_config import center_config as center_params
+from config.spm_config import spm_config as center_params
 from utils.utils import clip, gaussian_radius, prepare_bbox, read_json, prepare_kps
 from utils.data_aug import data_aug
 from encoder.spm import SingleStageLabel

@@ -8,7 +8,7 @@ import time
 
 from nets.spm_model import SpmModel
 from dataset.dataset import get_dataset
-from config.center_config import center_config as params
+from config.spm_config import spm_config as params
 from decoder.decode_spm import SpmDecoder
 
 colors = [[0,0,255],[255,0,0],[0,255,0],[0,255,255],[255,0,255],[255,255,0]]
@@ -17,9 +17,9 @@ netW = params['width']
 score = 0.6
 dist = 20
 # ckpt_path = '/home/hsw/server/ckpt-74/ckpt-84/ckpt-87'
-ckpt_path = '/home/hsw/server/multi_pose/spm/keras/ckpt_'
+ckpt_path = '/media/hsw/E/ckpt/spm_net/keras-server/ckpt_'
 # params['val_json_file'] = 'jsons/val_500.json'
-ckpts = [1, 2, 3, 4]
+ckpts = [6]
 
 @tf.function
 def infer(model, inputs):
@@ -83,11 +83,12 @@ if __name__ == '__main__':
                 predict['keypoint_annotations'] = kps
                 predictions.append(predict)
             e = time.time()
-            print("processing.... {} / {}, time cost == {}".format(step, 30000 // params['batch_size'], e-s))
+            if step % 1000 == 0:
+                print("processing.... {} / {}, time cost == {}".format(step, 30000 // params['batch_size'], e-s))
 
         print(len(predictions))
         if 'keras' in ckpt_path:
-            json_file = 'jsons/keras/ckpt_16_finetune/' + str(ckpt) + '_predicts.json'
+            json_file = 'jsons/keras/ckpt-16-8-finetune/' + str(ckpt) + '_predicts.json'
         else:
             json_file = 'jsons/' + str(ckpt) + '_predicts.json'
 

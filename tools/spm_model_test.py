@@ -12,6 +12,7 @@ import tensorflow as tf
 import os
 import cv2
 import argparse
+import time
 
 import numpy as np
 from nets.spm_model import SpmModel
@@ -73,7 +74,7 @@ def run(model, img):
             # cv2.putText(img_show, str(i), (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 250), 1)
 
     cv2.imshow('result', img_show)
-    k = cv2.waitKey(0)
+    k = cv2.waitKey(1)
 
 
 if __name__ == '__main__':
@@ -92,30 +93,19 @@ if __name__ == '__main__':
 
     assert args.ckpt is not None
 
-    # model.load_weights(args.ckpt, by_name=True)
-    ckpt = tf.train.Checkpoint(net=model)
-    ckpt.restore(args.ckpt).assert_existing_objects_matched()
+    # ckpt = tf.train.Checkpoint(net=model)
+    # ckpt.restore(args.ckpt).assert_existing_objects_matched()
 
-    # list1 = tf.train.list_variables('/home/hsw/server/multi_pose/spm/models/bak/ckpt-2')
-    # list2 = tf.train.list_variables('/home/hsw/server/ckpt-74/ckpt-79')
-    #
-    # for n, i in enumerate(list1):
-    #     print (i)
-    #     if n == 20:
-    #         break
-    # for n, i in enumerate(list2):
-    #     print (i)
-    #     if n == 20:
-    #         break
-    # diff = [i for i in list1 if i not in list2]
-    # print (diff)
-    # exit(0)
+    model.load_weights(args.ckpt)
 
     if args.video is not None:
-        cap = cv2.VideoCapture(args.video)
+        cap = cv2.VideoCapture(0)
         ret, img = cap.read()
-        while (ret):
+        while ret:
+            s = time.time()
             run(model, img)
+            e = time.time()
+            print ('time: ', e-s)
             ret, img = cap.read()
     elif os.path.isdir(args.imgs):
         for img_name in os.listdir(args.imgs):
