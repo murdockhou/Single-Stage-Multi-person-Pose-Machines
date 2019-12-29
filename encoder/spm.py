@@ -69,7 +69,9 @@ class SingleStageLabel():
                 continue
             # self.center_map[..., 0] = draw_gaussian(self.center_map[...,0], center, sigma, mask=None)
             self.center_map[..., 0] = draw_ttfnet_gaussian(self.center_map[...,0], center, sigma[0], sigma[1])
-            self.body_joint_displacement(center, kps, sigma)
+            # self.body_joint_displacement(center, kps, sigma)
+            self.body_joint_displacement_v2(center, kps, sigma)
+            # print (self.kps_map[int(center[1]), int(center[0])])
 
         # print (np.where(self.kps_count > 2))
         self.kps_count[self.kps_count == 0] += 1
@@ -98,6 +100,29 @@ class SingleStageLabel():
                 self.create_dense_displacement_map(index, start_joint, end_joint, taux, tauy)
                 start_joint = end_joint
 
+    def body_joint_displacement_v2(self, center, kps, sigma):
+        # taux = sigma[0]
+        # tauy = sigma[1]
+        taux = 2
+        tauy = 2
+
+        for single_path in self.level:
+            start_joint = [center[0], center[1]]
+            for i, index in enumerate(single_path):
+                end_joint = kps[3*index:3*index+3]
+                if end_joint[0] == 0 or end_joint[1] == 0:
+                    continue
+                # make new end_joint based offset
+                offset_x, offset_y = end_joint[0] - start_joint[0], end_joint[1] - start_joint[1]
+                next_x = center[0] + offset_x
+                next_y = center[1] + offset_y
+
+                # print ('index: {}, ori end point: {}, offset {},  new end point: {}'.format(
+                #     index, end_joint, [offset_x, offset_y], [next_x, next_y]))
+
+                self.create_dense_displacement_map(index, center, [next_x, next_y], taux, tauy)
+                start_joint[0], start_joint[1] = end_joint[0], end_joint[1]
+
     def create_dense_displacement_map(self, index, start_joint, end_joint, sigmax=2, sigmay=2):
 
         # print('start joint {} -> end joint {}'.format(start_joint, end_joint))
@@ -121,6 +146,7 @@ class SingleStageLabel():
                 x_offset = (end_joint[0] - x) / self.Z
                 y_offset = (end_joint[1] - y) / self.Z
                 # print (x_offset, y_offset)
+
                 self.kps_map[y, x, 2*index] += x_offset
                 self.kps_map[y, x, 2*index+1] += y_offset
                 self.kps_map_weight[y, x, 2*index:2*index+2] = 1.
