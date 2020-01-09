@@ -44,8 +44,9 @@ def infer(model, inputs):
     return center_map, kps_reg_map
 
 def run(model, img):
+
     img_show = img.copy()
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
     h, w, c = img.shape
     # 只在最右边或者最下边填充0, 这样不会影响box或者点的坐标值, 所以无需再对box或点的坐标做改变
     #if w > h:
@@ -53,28 +54,28 @@ def run(model, img):
     #else:
     #    img = cv2.copyMakeBorder(img, 0, 0, 0, h - w, cv2.BORDER_CONSTANT, value=(0, 0, 0))
 
-    img_ori = img.copy()
+    img = img.astype(np.float32) / 255.0
     img = cv2.resize(img, (netH, netW), interpolation=cv2.INTER_CUBIC)
-    img_input = np.expand_dims(img.astype(np.float32) / 255., axis=0)
-    factor_x = img_ori.shape[1] / (netW / 4)
-    factor_y = img_ori.shape[0] / (netH / 4)
+    img_input = np.expand_dims(img, axis=0)
+    factor_x = img_show.shape[1] / (netW / 4)
+    factor_y = img_show.shape[0] / (netH / 4)
 
     center_map, kps_reg_map = infer(model, img_input)
     # label = outputs[0]
     spm_decoder = SpmDecoder(factor_x, factor_y, netH // 4, netW // 4)
-    joints, centers = spm_decoder([center_map[0], kps_reg_map[0]], score_thres=score, dis_thres=dist)
-    print(centers)
+    results = spm_decoder([center_map[0], kps_reg_map[0]], score_thres=score, dis_thres=dist)
 
-    for j, single_person_joints in enumerate(joints):
-        cv2.circle(img_show, (int(centers[j][0]), int(centers[j][1])), 8, colors[j % 6], thickness=-1)
-        for i in range(14):
-            x = int(single_person_joints[2 * i])
-            y = int(single_person_joints[2 * i + 1])
-            cv2.circle(img_show, (x, y), 4, colors[j % 6], thickness=-1)
-            # cv2.putText(img_show, str(i), (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 250), 1)
-
-    cv2.imshow('result', img_show)
-    k = cv2.waitKey(1)
+    for j, result in enumerate(results):
+        center = result['center']
+        single_person_joints = result['joints']
+        cv2.circle(img_show, (int(center[0]), int(center[1])), 5, colors[j%3], thickness=-1)
+        for i in range(12):
+            x = int(single_person_joints[2*i])
+            y = int(single_person_joints[2*i+1])
+            cv2.circle(img_show, (x,y), 4, colors[j%3],thickness=-1)
+            # cv2.putText(img, str(i), (x,y), cv2.FONT_HERSHEY_COMPLEX, 1,(0, 0, 250), 1)
+    
+    return img_show
 
 
 if __name__ == '__main__':
@@ -93,9 +94,6 @@ if __name__ == '__main__':
 
     assert args.ckpt is not None
 
-    # ckpt = tf.train.Checkpoint(net=model)
-    # ckpt.restore(args.ckpt).assert_existing_objects_matched()
-
     model.load_weights(args.ckpt)
 
     if args.video is not None:
@@ -103,18 +101,24 @@ if __name__ == '__main__':
         ret, img = cap.read()
         while ret:
             s = time.time()
-            run(model, img)
+            result = run(model, img)
             e = time.time()
             print ('time: ', e-s)
+            cv2.imshow('result', result)
+            k = cv2.waitKey(1)
             ret, img = cap.read()
     elif os.path.isdir(args.imgs):
         for img_name in os.listdir(args.imgs):
             print('----------------------------------------------')
             img = cv2.imread(os.path.join(args.imgs, img_name))
-            run(model, img)
+            result = run(model, img)
+            cv2.imshow('result', result)
+            k = cv2.waitKey(0)
     elif os.path.isfile(args.imgs):
         img = cv2.imread(args.imgs)
-        run(model, img)
+        result = run(model, img)
+        cv2.imshow('result', result)
+        k = cv2.waitKey(0)
 
     else:
         print ('You Must Provide one video or imgs/img_path')

@@ -27,7 +27,7 @@ if use_dataset:
 
     colors = [[0,0,255],[255,0,0],[0,255,0]]
     for epco in range(1):
-        for step, (img, center_map, kps_map, kps_map_weight) in enumerate(dataset):
+        for step, (img, center_map, center_mask, kps_map, kps_map_weight) in enumerate(dataset):
             # print (step)
             # print (img[0].shape)
             # img1 = img[0]

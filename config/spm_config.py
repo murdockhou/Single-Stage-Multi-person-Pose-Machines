@@ -14,7 +14,7 @@ spm_config = {}
 spm_config['height'] = 512
 spm_config['width'] = 512
 spm_config['scale'] = 4
-spm_config['batch_size'] = 1
+spm_config['batch_size'] = 12
 spm_config['num_joints'] = 12
 
 spm_config['use_coco'] = False

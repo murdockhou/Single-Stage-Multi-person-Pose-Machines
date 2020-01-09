@@ -59,10 +59,10 @@ if __name__ == '__main__':
     def train_epoch():
         total_train_numbs = 1
         for epoch in range(epochs):
-            for step, (img, center_map, kps_offset, kps_map_weight) in enumerate(train_dataset):
+            for step, (img, center_map, center_mask, kps_offset, kps_map_weight) in enumerate(train_dataset):
                 with tf.GradientTape() as tape:
                     center_pred, kps_offset_pred = train_step(model, img)
-                    center_loss, kps_offset_loss = spm_loss(center_map, kps_offset, kps_map_weight, center_pred, kps_offset_pred)
+                    center_loss, kps_offset_loss = spm_loss(center_map, center_mask, kps_offset, kps_map_weight, center_pred, kps_offset_pred)
                     center_loss /= params['batch_size']
                     kps_offset_loss /= params['batch_size'] 
                     train_batch_loss = center_loss+kps_offset_loss 
@@ -74,12 +74,13 @@ if __name__ == '__main__':
                 tf.summary.scalar('loss', train_batch_loss, step=total_train_numbs*epoch+step)
                 tf.summary.scalar('root_joint_loss', center_loss, step=total_train_numbs*epoch+step)
                 tf.summary.scalar('offset_loss', kps_offset_loss, step=total_train_numbs*epoch+step)
-                if step % 1 == 0:
+                if step % 1000 == 0:
                     gt_root_joints = center_map
                     pred_root_joints = center_pred
                     tf.summary.image('gt_root_joints', gt_root_joints, step=total_train_numbs*epoch+step, max_outputs=3)
                     tf.summary.image('pred_root_joints',pred_root_joints, step=total_train_numbs*epoch+step, max_outputs=3)
                     tf.summary.image('img', img, step=total_train_numbs*epoch+step, max_outputs=3)
+                if step % 100 == 0:
                     print('for epoch {} step {}'.format(epoch, step))
                     print('....loss == {}, root joint loss == {}, body joint loss == {}'.format(train_batch_loss, center_loss, kps_offset_loss))
 
@@ -89,15 +90,15 @@ if __name__ == '__main__':
             total_val_loss = 0.
             total_center_loss = 0.
             total_offset_loss = 0.
-            for step, (img, center_map, kps_offset, kps_map_weight) in enumerate(test_dataset):
+            for step, (img, center_map, center_mask, kps_offset, kps_map_weight) in enumerate(test_dataset):
                 center_pred, kps_offset_pred = train_step(model, img)
-                center_loss, kps_offset_loss = spm_loss(center_map, kps_offset, kps_map_weight, center_pred, kps_offset_pred)
+                center_loss, kps_offset_loss = spm_loss(center_map, center_mask, kps_offset, kps_map_weight, center_pred, kps_offset_pred)
                 total_center_loss += center_loss / params['batch_size']
                 total_offset_loss += kps_offset_loss / params['batch_size']
                 total_val_loss += (total_center_loss + total_offset_loss)
             print('......................................................................................\n, Epoch {}, ave center loss {:7f}, ave offset loss {:7f}'.format(epoch, total_center_loss / (step + 1), total_offset_loss / (step + 1)))
 
-            model.save_weights('keras/{:02d}-{:.7f}.h5'.format(epoch+1, total_val_loss / (step + 1)))
+            model.save_weights('keras/{:02d}-{:.10f}.h5'.format(epoch+1, total_val_loss / (step + 1)))
 
 
 

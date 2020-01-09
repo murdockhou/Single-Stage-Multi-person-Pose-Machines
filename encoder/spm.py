@@ -26,7 +26,7 @@ class SingleStageLabel():
         self.orih = img_info['height']
         self.oriw = img_info['width']
         self.sigma = sigma
-        self.tau = sigma
+        self.tau = 7.
         # hierarchical SPR, 0->1->2, 3->4->5, 6->7->8, 9->10->11, only use the first 12 points of ai-format
         self.level = [[0, 1, 2],
                       [3, 4, 5],
@@ -72,8 +72,9 @@ class SingleStageLabel():
 
         self.kps_count[self.kps_count == 0] += 1
         self.kps_offset = np.divide(self.kps_offset, self.kps_count)
+        self.center_mask = np.where(self.center_map>0, 1, 0)
         
-        return img, self.center_map, self.kps_offset, self.kps_weight
+        return img, self.center_map, self.center_mask, self.kps_offset, self.kps_weight
 
     def create_spm_label(self, bbox, kps):
         w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
@@ -127,7 +128,8 @@ class SingleStageLabel():
 
                 self.kps_offset[y, x, 2*index] += x_offset
                 self.kps_offset[y, x, 2*index+1] += y_offset
-                self.kps_weight[y, x, 2*index:2*index+2] = 1.
+                # self.kps_weight[y, x, 2*index:2*index+2] = 1.
+                self.kps_weight[y, x] = 1
                 if end_joint[0] != x or end_joint[1] != y:
                     self.kps_count[y, x, 2*index:2*index+2] += 1
 

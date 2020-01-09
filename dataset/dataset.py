@@ -46,21 +46,22 @@ def get_dataset(num_gpus = 1, mode = 'train'):
         annos    = coco.loadAnns(ann_ids)
 
         spm = SingleStageLabel(img_info, img_path, annos)
-        img, center_map, kps_offset, kps_weight = spm(params['height'], params['width'], params['scale'], params['num_joints'])
+        img, center_map, center_mask, kps_offset, kps_weight = spm(params['height'], params['width'], params['scale'], params['num_joints'])
 
-        return img, center_map, kps_offset, kps_weight
+        return img, center_map, center_mask, kps_offset, kps_weight
 
     def tf_parser_func(img_id):
-        [img, center_map, kps_offset, kps_weight] = tf.py_function(
-            func=parser_func, inp=[img_id], Tout=[tf.float32, tf.float32, tf.float32, tf.float32]
+        [img, center_map, center_mask, kps_offset, kps_weight] = tf.py_function(
+            func=parser_func, inp=[img_id], Tout=[tf.float32, tf.float32, tf.float32, tf.float32, tf.float32]
         )
         
         img.set_shape([params['height'], params['width'], 3])
         center_map.set_shape([params['height']//params['scale'], params['width']//params['scale'], 1])
+        center_mask.set_shape([params['height']//params['scale'], params['width']//params['scale'], 1])
         kps_offset.set_shape([params['height']//params['scale'], params['width']//params['scale'], params['num_joints']*2])
         kps_weight.set_shape([params['height']//params['scale'], params['width']//params['scale'], params['num_joints']*2])
 
-        return img, center_map, kps_offset, kps_weight
+        return img, center_map, center_mask, kps_offset, kps_weight
 
 
     if mode == 'train':
