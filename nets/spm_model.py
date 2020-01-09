@@ -10,15 +10,16 @@
 '''
 
 import tensorflow as tf
-from nets.hrnet import HRNet as BackBone
+# from nets.hrnet import HRNet as BackBone
+from nets.mobilenetV3 import MobileNetV3Large as BackBone
 
 def SpmModel(inputs, num_joints, is_training = True):
 
     body = BackBone(inputs, training=is_training)
 
-    body = head_net(body, 256, name='head', training=is_training)
-    rootJoints = head_net(body, 1, name='root_joints', bn=False)
-    displacement = head_net(body, 2*num_joints, name='reg_map', bn=False)
+    body = head_net(body, 256, name='body', training=is_training)
+    rootJoints = head_net(body, 1, name='center', bn=False)
+    displacement = head_net(body, 2*num_joints, name='center_kps_offset', bn=False)
 
     return rootJoints, displacement
 

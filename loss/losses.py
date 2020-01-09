@@ -110,26 +110,18 @@ def keypoints_loss(gt_center_kps_offset, gt_center_kps_mask, pred_center_kps_off
 
     return loss,  [center_kps_offset_loss, heatmap_loss, kps_offset]
 
-def spm_loss(gt_root_joint, gt_joint_offset, gt_joint_offset_weight, preds):
+def spm_loss(gt_root_joint, gt_joint_offset, gt_joint_offset_weight, 
+             root_pred, root_kps_offset_pred):
 
-    root_weight = 10
+    root_weight = 1
     joint_weight = 1
-    #
-    # gt_root_joint = label[...,0:1]
-    # gt_joint_offset = label[...,1:2*14+1]
-    # gt_joint_offset_weight = label[..., 2*14+1:]
-
-    pred_root_joint = preds[0]
-    pred_joint_offset = preds[1]
 
     # tf.reduce_mean(tf.keras.losses.MSE()) 和 pytorch中的torch.nn.MSELoss()取默认参数时值一样
-    root_joint_loss = tf.reduce_mean(tf.keras.losses.MSE(gt_root_joint, pred_root_joint))
+    root_joint_loss = tf.reduce_mean(tf.keras.losses.MSE(gt_root_joint, root_pred))
 
     # huber loss 就是 smooth l1 loss，和pytorch中的torch.nn.SmoothL1Loss()结果一致
     huber_loss = tf.losses.Huber()
-    pred_joint_loss = huber_loss(gt_joint_offset*gt_joint_offset_weight, pred_joint_offset*gt_joint_offset_weight)
+    pred_joint_loss = huber_loss(gt_joint_offset*gt_joint_offset_weight, root_kps_offset_pred*gt_joint_offset_weight)
 
-    # pred_joint_loss = tf.reduce_sum(tf.abs(gt_joint_offset-pred_joint_offset))
-
-    return [root_weight*root_joint_loss + joint_weight * pred_joint_loss, root_weight*root_joint_loss, joint_weight*pred_joint_loss]
+    return [root_weight*root_joint_loss, joint_weight*pred_joint_loss]
 

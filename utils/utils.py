@@ -15,7 +15,8 @@ from config.spm_config import spm_config as params
 
 def draw_ttfnet_gaussian(heatmap, center, sigmax, sigmay, mask=None):
     # print (sigmax, sigmay)
-    center_x, center_y = int(center[0]), int(center[1])
+    # center_x, center_y = int(center[0]), int(center[1])
+    center_x, center_y = center[0], center[1]
     th = 4.6052
     delta = np.sqrt(th * 2)
 

@@ -7,16 +7,19 @@ The custom distribute training is right, but I write `checkpoint = tf.train.Chec
 is different, one is `net=model` and another is `model=model`. So, if I use checkpoints saved by  `checkpoint = tf.train.Checkpoint(optimizer=optimizer, model=model)`, it is impossible using `checkpoint = tf.train.Checkpoint(optimizer=optimizer, net=model)` to restore it. So, we must keep parameters in `tf.train.Checkpoint` as same as possible.
 By the way, it's a good way add `checkpoint.restore(ckpt_path).assert_existing_objects_matched()` to find restore error as soon as possible.
 - [x] using tf.keras to run distribute training 
+- [ ] add coco eval while training
 
 ## Requirement
 * tensorflow 2.0.0
 * python 3.6
 * cuda 10
 * [imgaug](https://github.com/aleju/imgaug) == 0.3.0
+* pycocotools
 
-## Train Dataset
+## About Dataset
 
-we use ai-challenger format dataset, which can found in this [website](https://challenger.ai/competition/keypoint). Maybe disabled, MSCOCO dataset is ok too, just change some file to suitable for its format.
+we use the first 12 points of ai-challenger format, which can found in this [website](https://challenger.ai/competition/keypoint). Maybe disabled, MSCOCO dataset is ok too, but need to delete five points on head and change its format just like ai-challenger. Note that we still use pycocotools to load data, so if you use ai-challenger, you need to translate its annos file format into coco annos format. [here](utils/convert_ai_format_to_coco.ipynb) is a convert code just for reference. 
+
 
 ## Network Structure
 
@@ -79,8 +82,6 @@ In `spm_loss` function, you need carefully to set value of two different kinds o
  10. left_hip 
  11. left_knee 
  12. left_ankle
- 13. head
- 14. neck
  
 ## Thanks
 [hrnet tensorlfow implementation](https://github.com/VXallset/deep-high-resolution-net.TensorFlow)

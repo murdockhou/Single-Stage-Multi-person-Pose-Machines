@@ -1,2 +1,6 @@
 *.pyc
 .idea
+logs
+jsons
+keras
+__pycache__

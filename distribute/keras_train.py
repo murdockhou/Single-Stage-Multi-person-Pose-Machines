@@ -1,5 +1,5 @@
 import tensorflow as tf
-from distribute.utils_keras.keras_dataset import  get_dataset
+from dataset.dataset import  get_dataset
 from nets.spm_model import SpmModel
 from config.spm_config import spm_config as params
 
@@ -71,8 +71,8 @@ if __name__ =='__main__':
     # def callbacks
     callbacks = [
         tf.keras.callbacks.TensorBoard(log_dir='keras/logs', write_graph=True, update_freq=100),
-        tf.keras.callbacks.ModelCheckpoint(filepath='keras/ckpt_{epoch}', monitor='val_loss', verbose=1, save_weights_only=True),
-        tf.keras.callbacks.LearningRateScheduler(schedule=step_lr, verbose=1)
+        tf.keras.callbacks.ModelCheckpoint(filepath='keras/{epoch:02d}-{val_loss:.7f}.hdf5', monitor='val_loss', verbose=1, save_weights_only=True),
+        # tf.keras.callbacks.LearningRateScheduler(schedule=step_lr, verbose=1)
     ]
 
     # start training

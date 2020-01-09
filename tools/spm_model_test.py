@@ -99,7 +99,7 @@ if __name__ == '__main__':
     model.load_weights(args.ckpt)
 
     if args.video is not None:
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(args.video)
         ret, img = cap.read()
         while ret:
             s = time.time()
