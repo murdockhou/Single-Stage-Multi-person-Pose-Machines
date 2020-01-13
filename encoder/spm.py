@@ -89,9 +89,10 @@ class SingleStageLabel():
             center_sigmay = min(self.sigma*1.5, center_sigmax * h / w)
 
         centers = [(bbox[0]+bbox[2])/2, (bbox[1]+bbox[3])/2]
-        self.center_map[..., 0] = draw_ttfnet_gaussian(self.center_map[...,0], centers, 
-                                                       center_sigmax,
-                                                       center_sigmay)
+        # self.center_map[..., 0] = draw_ttfnet_gaussian(self.center_map[...,0], centers, 
+        #                                                center_sigmax,
+        #                                                center_sigmay)
+        self.center_map[..., 0] = self.create_center_label(self.center_map[...,0], centers, self.tau)
 
         self.body_joint_displacement_v2(centers, kps, self.tau)       
 
@@ -133,6 +134,19 @@ class SingleStageLabel():
                 if end_joint[0] != x or end_joint[1] != y:
                     self.kps_count[y, x, 2*index:2*index+2] += 1
 
+
+    def create_center_label(self, heatmap, centers, tau):
+        center_x = centers[0]
+        center_y = centers[1]
+        x0 = 0
+        y0 = 0
+        x1 = self.outw
+        y1 = self.outh
+        for x in range(x0, x1):
+            for y in range(y0, y1):
+                dis = math.sqrt((x-center_x)**2 + (y-center_y)**2)
+                heatmap[y, x] = max(math.exp(-dis/tau/tau), heatmap[y,x])
+        return heatmap
 
     # def create_dense_displacement_map(self, index, start_joint, end_joint, sigmax=2, sigmay=2):
 

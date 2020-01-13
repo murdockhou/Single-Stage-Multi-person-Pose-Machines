@@ -21,9 +21,9 @@ from decoder.decode_spm import SpmDecoder
 parser = argparse.ArgumentParser()
 parser.add_argument('--video', default=None, type=str)
 parser.add_argument('--imgs',
-                    default='/media/hsw/E/datasets/ai_challenger_valid_test/ai_challenger_keypoint_test_b_20180103/keypoint_test_b_images_20180103',
+                    default='/media/hsw/E/datasets/ai-challenger/ai_test/ai_test_a/test_a',
                     type=str)
-parser.add_argument('--score', default=0.6, type=float)
+parser.add_argument('--score', default=0.1, type=float)
 parser.add_argument('--dist', default=20., type=float)
 parser.add_argument('--netH', default=512, type=int)
 parser.add_argument('--netW', default=512, type=int)
@@ -63,9 +63,10 @@ def run(model, img):
     center_map, kps_reg_map = infer(model, img_input)
     # label = outputs[0]
     spm_decoder = SpmDecoder(factor_x, factor_y, netH // 4, netW // 4)
-    results = spm_decoder([center_map[0], kps_reg_map[0]], score_thres=score, dis_thres=dist)
+    results = spm_decoder([center_map[0].numpy(), kps_reg_map[0]].numpy(), score_thres=score, dis_thres=dist)
 
     for j, result in enumerate(results):
+        print (result)
         center = result['center']
         single_person_joints = result['joints']
         cv2.circle(img_show, (int(center[0]), int(center[1])), 5, colors[j%3], thickness=-1)
@@ -80,7 +81,7 @@ def run(model, img):
 
 if __name__ == '__main__':
 
-    use_gpu = True
+    use_gpu = False
     use_nms = True
 
     if use_gpu:
@@ -89,7 +90,7 @@ if __name__ == '__main__':
         os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
     inputs = tf.keras.Input(shape=(netH, netW, 3), name='modelInput')
-    outputs = SpmModel(inputs, 14, is_training=False)
+    outputs = SpmModel(inputs, 12, is_training=False)
     model = tf.keras.Model(inputs, outputs)
 
     assert args.ckpt is not None
@@ -106,6 +107,8 @@ if __name__ == '__main__':
             print ('time: ', e-s)
             cv2.imshow('result', result)
             k = cv2.waitKey(1)
+            if k == ord('q'):
+                break
             ret, img = cap.read()
     elif os.path.isdir(args.imgs):
         for img_name in os.listdir(args.imgs):
@@ -114,6 +117,8 @@ if __name__ == '__main__':
             result = run(model, img)
             cv2.imshow('result', result)
             k = cv2.waitKey(0)
+            if k == ord('q'):
+                break
     elif os.path.isfile(args.imgs):
         img = cv2.imread(args.imgs)
         result = run(model, img)

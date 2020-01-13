@@ -61,9 +61,8 @@ else:
     from utils.data_aug import data_aug
     from pycocotools.coco import COCO
 
-    json_file = params['train_json_file']
-    img_path = params['train_img_path']
-    
+    json_file = '/media/hsw/E/datasets/multipose_with_only_12_body_joints/aitrain.json'
+    img_path = '/media/hsw/E/datasets/ai-challenger/ai_train/train'
     coco = COCO(json_file)
     cat_ids = coco.getCatIds(catNms=['person'])
     img_ids = coco.getImgIds(catIds=cat_ids)
@@ -95,7 +94,7 @@ else:
 
 
         spm = SingleStageLabel(img_info, img_path, annos)
-        img, center_map, kps_offset, kps_weight = spm(params['height'], params['width'], params['scale'], params['num_joints'])
+        img, center_map, center_mask, kps_offset, kps_weight = spm(params['height'], params['width'], params['scale'], params['num_joints'])
 
         cv2.imshow('center', center_map)
         #  data aug
