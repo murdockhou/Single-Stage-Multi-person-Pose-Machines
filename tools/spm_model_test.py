@@ -61,19 +61,21 @@ def run(model, img):
     factor_y = img_show.shape[0] / (netH / 4)
 
     center_map, kps_reg_map = infer(model, img_input)
+    # print (center_map.shape)
+    # print (kps_reg_map.shape)
     # label = outputs[0]
     spm_decoder = SpmDecoder(factor_x, factor_y, netH // 4, netW // 4)
-    results = spm_decoder([center_map[0].numpy(), kps_reg_map[0]].numpy(), score_thres=score, dis_thres=dist)
+    results = spm_decoder([center_map[0].numpy(), kps_reg_map[0].numpy()], score_thres=score, dis_thres=dist)
 
     for j, result in enumerate(results):
-        print (result)
+        # print (result)
         center = result['center']
         single_person_joints = result['joints']
         cv2.circle(img_show, (int(center[0]), int(center[1])), 5, colors[j%3], thickness=-1)
-        for i in range(12):
-            x = int(single_person_joints[2*i])
-            y = int(single_person_joints[2*i+1])
-            cv2.circle(img_show, (x,y), 4, colors[j%3],thickness=-1)
+        # for i in range(12):
+        #     x = int(single_person_joints[2*i])
+        #     y = int(single_person_joints[2*i+1])
+        #     cv2.circle(img_show, (x,y), 4, colors[j%3],thickness=-1)
             # cv2.putText(img, str(i), (x,y), cv2.FONT_HERSHEY_COMPLEX, 1,(0, 0, 250), 1)
     
     return img_show

@@ -89,10 +89,8 @@ class SingleStageLabel():
             center_sigmay = min(self.sigma*1.5, center_sigmax * h / w)
 
         centers = [(bbox[0]+bbox[2])/2, (bbox[1]+bbox[3])/2]
-        # self.center_map[..., 0] = draw_ttfnet_gaussian(self.center_map[...,0], centers, 
-        #                                                center_sigmax,
-        #                                                center_sigmay)
-        self.center_map[..., 0] = self.create_center_label(self.center_map[...,0], centers, self.tau)
+        self.center_map[..., 0] = draw_ttfnet_gaussian(self.center_map[...,0], centers, center_sigmax, center_sigmay)
+        # self.center_map[..., 0] = self.create_center_label(self.center_map[...,0], centers, self.tau)
 
         self.body_joint_displacement_v2(centers, kps, self.tau)       
 

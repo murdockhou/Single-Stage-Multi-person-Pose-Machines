@@ -63,7 +63,9 @@ if __name__ == '__main__':
             for step, (img, center_map, center_mask, kps_offset, kps_map_weight) in enumerate(train_dataset):
                 with tf.GradientTape() as tape:
                     center_pred, kps_offset_pred = train_step(model, img)
-                    center_loss, kps_offset_loss = spm_loss(center_map, center_mask, kps_offset, kps_map_weight, center_pred, kps_offset_pred)
+                    center_loss, kps_offset_loss = spm_loss(center_map=center_map, center_mask=center_mask, 
+                                                            center_offset=kps_offset, center_offset_mask=kps_map_weight, 
+                                                            pred_center_map=center_pred, pred_center_offset=kps_offset_pred)
                     center_loss /= params['batch_size']
                     kps_offset_loss /= params['batch_size'] 
                     train_batch_loss = center_loss+kps_offset_loss 
@@ -78,9 +80,9 @@ if __name__ == '__main__':
                 if step % 1000 == 0:
                     gt_root_joints = center_map
                     pred_root_joints = center_pred
-                    tf.summary.image('gt_root_joints', gt_root_joints, step=total_train_numbs*epoch+step, max_outputs=3)
-                    tf.summary.image('pred_root_joints',pred_root_joints, step=total_train_numbs*epoch+step, max_outputs=3)
-                    tf.summary.image('img', img, step=total_train_numbs*epoch+step, max_outputs=3)
+                    tf.summary.image('gt_root_joints', gt_root_joints, step=total_train_numbs*epoch+step, max_outputs=2)
+                    tf.summary.image('pred_root_joints',pred_root_joints, step=total_train_numbs*epoch+step, max_outputs=2)
+                    tf.summary.image('img', img, step=total_train_numbs*epoch+step, max_outputs=2)
                 if step % 100 == 0:
                     print('for epoch {} step {}'.format(epoch, step))
                     print('....loss == {:.7f}, root joint loss == {:.7f}, body joint loss == {:.7f}'.format(train_batch_loss, center_loss, kps_offset_loss))

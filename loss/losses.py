@@ -125,26 +125,25 @@ def spm_loss(center_map, center_mask,
              center_offset, center_offset_mask,
              pred_center_map, pred_center_offset):
 
-    center_weight = 1
+    center_weight = 0.1
     offset_weight = 1
 
     # tf.reduce_mean(tf.keras.losses.MSE()) 和 pytorch中的torch.nn.MSELoss()取默认参数时值一样
-    # root_joint_loss = tf.reduce_mean(tf.keras.losses.MSE(gt_root_joint*gt_root_joint_mask, root_pred*gt_root_joint_mask))
+    # center_loss = tf.reduce_mean(tf.keras.losses.MSE(center_map*center_mask, pred_center_map*center_mask))
 
 
     # huber loss 就是 smooth l1 loss，和pytorch中的torch.nn.SmoothL1Loss()结果一致
     # huber_loss = tf.losses.Huber()
-    # pred_joint_loss = huber_loss(gt_joint_offset*gt_joint_offset_weight, root_kps_offset_pred*gt_joint_offset_weight)
+    # center_offset_loss = huber_loss(center_offset*center_offset_mask, pred_center_offset*center_offset_mask)
 
-    # nums1 = tf.reduce_sum(gt_root_joint_mask)
-    # nums2 = tf.reduce_sum(gt_joint_offset_weight)
+    # nums1 = tf.reduce_sum(center_mask)
+    # nums2 = tf.reduce_sum(center_offset_mask)
 
-    # print (tf.reduce_sum(center_mask), center_mask.shape)
     center_loss = tf.reduce_sum(tf.nn.l2_loss(center_map * center_mask - pred_center_map * center_mask)) 
     center_offset_loss = SmoothL1Loss(center_offset * center_offset_mask, pred_center_offset * center_offset_mask) 
 
-    # root_joint_loss = tf.reduce_sum(tf.nn.l2_loss(gt_root_joint-root_pred)) 
-    # pred_joint_loss = SmoothL1Loss(gt_joint_offset, root_kps_offset_pred)
+    # center_loss = tf.reduce_sum(tf.nn.l2_loss(center_map-pred_center_map)) 
+    # center_offset_loss = SmoothL1Loss(center_offset, pred_center_offset)
 
 
     return [center_loss * center_weight, center_offset_loss * offset_weight]
