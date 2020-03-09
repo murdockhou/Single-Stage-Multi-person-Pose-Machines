@@ -21,8 +21,8 @@ if __name__ =='__main__':
     # def loss func
     def SmoothL1Loss(label, pred):
 
-        weight = label[..., params['joints'] * 2:]
-        label = label[..., :params['joints'] * 2]
+        weight = label[..., params['num_joints'] * 2:]
+        label = label[..., :params['num_joints'] * 2]
 
         t = tf.abs(label * weight - pred * weight)
 
@@ -40,7 +40,7 @@ if __name__ =='__main__':
     with strategy.scope():
         # define model
         inputs = tf.keras.Input(shape=(params['height'], params['width'], 3), name='modelInput')
-        outputs = SpmModel(inputs, num_joints=params['joints'], is_training=True)
+        outputs = SpmModel(inputs, num_joints=params['num_joints'], is_training=True)
         model = tf.keras.Model(inputs, outputs)
 
 
@@ -117,7 +117,7 @@ if __name__ =='__main__':
     #     return root_joint_loss
     #
     # inputs = tf.keras.Input(shape=(center_config['height'], center_config['width'], 3), name='modelInput')
-    # outputs = SpmModel(inputs, num_joints=center_config['joints'], is_training=True)
+    # outputs = SpmModel(inputs, num_joints=center_config['num_joints'], is_training=True)
     # model = tf.keras.Model(inputs, outputs)
     #
     # model.compile(loss={'root_joints_conv1x1': root_loss,

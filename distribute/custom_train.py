@@ -8,7 +8,7 @@ import datetime
 
 if __name__ == '__main__':
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0, 1'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
     visible_gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     with strategy.scope():
         inputs = tf.keras.Input(shape=(params['height'], params['width'], 3), name='modelInput')
-        outputs = SpmModel(inputs, num_joints=params['joints'], is_training=True)
+        outputs = SpmModel(inputs, num_joints=params['num_joints'], is_training=True)
         model = tf.keras.Model(inputs, outputs)
         optimizer = tf.optimizers.Adam(learning_rate=3e-4)
         checkpoint = tf.train.Checkpoint(optimizer=optimizer, net=model)
@@ -42,31 +42,30 @@ if __name__ == '__main__':
         def SmoothL1Loss(label, pred, weight):
             t = tf.abs(label * weight - pred * weight)
 
-            return tf.reduce_mean(
+            return tf.reduce_sum(
                 tf.where(
                     t <= 1, 0.5 * t * t, 0.5 * (t - 1)
                 )
             )
 
         def L2Loss(label, pred):
-            return tf.reduce_mean(tf.losses.mse(label, pred))
+            return tf.reduce_sum(tf.losses.mse(label, pred))
 
         def comput_loss(center_map, kps_map, kps_map_weight, preds):
             kps_loss = SmoothL1Loss(kps_map, preds[1], kps_map_weight)
             root_loss = L2Loss(center_map, preds[0])
-
             per_example_loss = kps_loss + root_loss
-
-            return tf.nn.compute_average_loss(per_example_loss, global_batch_size=params['batch_size']*len(gpu_ids))
+            return per_example_loss
+            #return tf.nn.compute_average_loss(per_example_loss, global_batch_size=params['batch_size']*len(gpu_ids))
 
 
     with strategy.scope():
         def train_step(inputs):
-            img, center_map, kps_map, kps_map_weight = inputs
+            img, center_map, center_mask, kps_map, kps_map_weight = inputs
             with tf.GradientTape() as tape:
                 preds = model(img)
                 loss = comput_loss(center_map, kps_map, kps_map_weight, preds)
-
+                loss = loss * 1.0 / (params['batch_size'] * len (gpu_ids))
             grads = tape.gradient(loss, model.trainable_variables)
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
@@ -84,9 +83,10 @@ if __name__ == '__main__':
             train_batchs = 0.0
 
             for x in dist_dataset:
-                total_loss += distribute_train_step(x)
+                train_batch_loss = distribute_train_step(x)
+                total_loss += train_batch_loss
                 train_batchs += 1
-
+               
             checkpoint.save(checkpoint_prefix)
             template = ('Epoch: {}, Train Steps: {}, Train Ave Loss: {}')
             print(template.format(epoch, train_batchs, total_loss / train_batchs))
