@@ -21,7 +21,7 @@ import datetime
 
 if __name__ == '__main__':
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '3'
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
     gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
     for gpu in gpus:
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         print ('Successfully load pretrained model from ... {}'.format(params['finetune']))
 
     cur_time = datetime.datetime.fromtimestamp(datetime.datetime.now().timestamp()).strftime('%Y-%m-%d-%H-%M')
-    summary_writer = tf.summary.create_file_writer(os.path.join('./logs/spm', cur_time))
+   # summary_writer = tf.summary.create_file_writer(os.path.join('./logs/spm', cur_time))
 
     optimizer = tf.optimizers.Adam(learning_rate=1e-4)
     train_dataset = get_dataset(num_gpus=1, mode='train')
@@ -74,15 +74,15 @@ if __name__ == '__main__':
                 optimizer.learning_rate = lr_decay(epoch)
                 optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
-                tf.summary.scalar('loss', train_batch_loss, step=total_train_numbs*epoch+step)
-                tf.summary.scalar('root_joint_loss', center_loss, step=total_train_numbs*epoch+step)
-                tf.summary.scalar('offset_loss', kps_offset_loss, step=total_train_numbs*epoch+step)
-                if step % 1000 == 0:
-                    gt_root_joints = center_map
-                    pred_root_joints = center_pred
-                    tf.summary.image('gt_root_joints', gt_root_joints, step=total_train_numbs*epoch+step, max_outputs=2)
-                    tf.summary.image('pred_root_joints',pred_root_joints, step=total_train_numbs*epoch+step, max_outputs=2)
-                    tf.summary.image('img', img, step=total_train_numbs*epoch+step, max_outputs=2)
+              #  tf.summary.scalar('loss', train_batch_loss, step=total_train_numbs*epoch+step)
+              #  tf.summary.scalar('root_joint_loss', center_loss, step=total_train_numbs*epoch+step)
+              #  tf.summary.scalar('offset_loss', kps_offset_loss, step=total_train_numbs*epoch+step)
+              #  if step % 1000 == 0:
+              #      gt_root_joints = center_map
+              #      pred_root_joints = center_pred
+              #      tf.summary.image('gt_root_joints', gt_root_joints, step=total_train_numbs*epoch+step, max_outputs=2)
+              #      tf.summary.image('pred_root_joints',pred_root_joints, step=total_train_numbs*epoch+step, max_outputs=2)
+              #      tf.summary.image('img', img, step=total_train_numbs*epoch+step, max_outputs=2)
                 if step % 100 == 0:
                     print('for epoch {} step {}'.format(epoch, step))
                     print('....loss == {:.7f}, root joint loss == {:.7f}, body joint loss == {:.7f}'.format(train_batch_loss, center_loss, kps_offset_loss))
@@ -103,8 +103,7 @@ if __name__ == '__main__':
 
             model.save_weights('keras/{:02d}-{:.10f}.h5'.format(epoch+1, total_val_loss / (step + 1)))
 
-
-
-    with summary_writer.as_default():
-        train_epoch()
-
+    train_epoch()
+#    with summary_writer.as_default():
+#        train_epoch()
+#

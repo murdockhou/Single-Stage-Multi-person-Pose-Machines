@@ -72,11 +72,12 @@ def run(model, img):
         center = result['center']
         single_person_joints = result['joints']
         cv2.circle(img_show, (int(center[0]), int(center[1])), 5, colors[j%3], thickness=-1)
-        # for i in range(12):
-        #     x = int(single_person_joints[2*i])
-        #     y = int(single_person_joints[2*i+1])
-        #     cv2.circle(img_show, (x,y), 4, colors[j%3],thickness=-1)
-            # cv2.putText(img, str(i), (x,y), cv2.FONT_HERSHEY_COMPLEX, 1,(0, 0, 250), 1)
+        for i in range(12):
+            
+            x = int(single_person_joints[2*i])
+            y = int(single_person_joints[2*i+1])
+            cv2.circle(img_show, (x,y), 4, colors[j%3],thickness=-1)
+            cv2.putText(img, str(i), (x,y), cv2.FONT_HERSHEY_COMPLEX, 1,(0, 0, 250), 1)
     
     return img_show
 

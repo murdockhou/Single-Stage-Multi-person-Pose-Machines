@@ -23,7 +23,7 @@ class SpmDecoder():
                       [9, 10, 11],
                       ]
         self.Z = math.sqrt(outw**2 + outh**2)
-        # self.Z = 1
+        #self.Z = 1
         self.outw = outw
         self.outh = outh
         # print ('decoder self.z', self.Z)
@@ -52,7 +52,7 @@ class SpmDecoder():
                     if offset[0] == 0 or offset[1] == 0:
                         continue
                     joint = [start_joint[0]+offset[0]*self.Z, start_joint[1]+offset[1]*self.Z]
-                    # print ('start joint {} -> end joint {}'.format(start_joint, joint))
+                    print ('start joint {} -> end joint {}, offset {}'.format(start_joint, joint, offset))
                     single_person_joints[2*index:2*index+2] = joint
                     start_joint = joint
 

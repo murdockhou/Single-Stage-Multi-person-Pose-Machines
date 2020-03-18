@@ -117,7 +117,7 @@ def MobileNetV3Large(inputs, training=True):
         backbone.append(net)
 
     backbone = tf.keras.layers.Concatenate()(backbone)
-    backbone = tf.keras.layers.SeparableConv2D(256, 3, 1, 'same', activation=tf.nn.relu)(backbone)
+    backbone = tf.keras.layers.Conv2D(512, 3, 1, 'same', activation=tf.nn.relu)(backbone)
 
     return backbone    
 

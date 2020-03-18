@@ -125,7 +125,7 @@ def spm_loss(center_map, center_mask,
              center_offset, center_offset_mask,
              pred_center_map, pred_center_offset):
 
-    center_weight = 0.1
+    center_weight = 1
     offset_weight = 1
 
     # tf.reduce_mean(tf.keras.losses.MSE()) 和 pytorch中的torch.nn.MSELoss()取默认参数时值一样
@@ -140,7 +140,7 @@ def spm_loss(center_map, center_mask,
     # nums2 = tf.reduce_sum(center_offset_mask)
 
     center_loss = tf.reduce_sum(tf.nn.l2_loss(center_map * center_mask - pred_center_map * center_mask)) 
-    center_offset_loss = SmoothL1Loss(center_offset * center_offset_mask, pred_center_offset * center_offset_mask) 
+    center_offset_loss = tf.reduce_sum(SmoothL1Loss(center_offset * center_offset_mask, pred_center_offset * center_offset_mask) )
 
     # center_loss = tf.reduce_sum(tf.nn.l2_loss(center_map-pred_center_map)) 
     # center_offset_loss = SmoothL1Loss(center_offset, pred_center_offset)

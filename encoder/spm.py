@@ -45,7 +45,7 @@ class SingleStageLabel():
         self.outh = inh//scale
         self.outw = inw//scale
         self.Z = math.sqrt(self.outw**2 + self.outh**2)
-        # self.Z = 1
+       # self.Z = 1
 
         scale_x = self.oriw / self.outw
         scale_y = self.orih / self.outh
@@ -123,7 +123,8 @@ class SingleStageLabel():
             for y in range(y0, y1):
                 x_offset = (end_joint[0] - x) / self.Z
                 y_offset = (end_joint[1] - y) / self.Z
-                # print (x_offset, y_offset)
+                #print (x_offset, y_offset)
+             #   assert x_offset <= 1 and x_offset >= -1 and y_offset <= 1 and y_offset >=-1
 
                 self.kps_offset[y, x, 2*index] += x_offset
                 self.kps_offset[y, x, 2*index+1] += y_offset
